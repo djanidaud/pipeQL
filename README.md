@@ -3,4 +3,5 @@ A query language for working with CSV files build around the Pipes and Filters d
 
 
 Compile with: ghc Main.hs
+
 Run with: ./Main someCode.txt
