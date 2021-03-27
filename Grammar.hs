@@ -1059,54 +1059,54 @@ happySeq = happyDontSeq
 
 parseError :: [Token] -> a
 parseError [] = error "Unknown Parse Error" 
-parseError ((TokenCSV al):_)        = printError "" al
-parseError ((TokenImport al):_)     = printError "" al
-parseError ((TokenPrint al):_)      = printError "" al
-parseError ((TokenAsc al):_)        = printError "" al
-parseError ((TokenDesc al):_)       = printError "" al
-parseError ((TokenSelect al):_)     = printError "" al
-parseError ((TokenReform al):_)     = printError "" al
-parseError ((TokenUpdate al):_)     = printError "" al
-parseError ((TokenWrite al):_)      = printError "" al
-parseError ((TokenArity al):_)      = printError "" al
-parseError ((TokenIf al):_)         = printError "" al
-parseError ((TokenThen al):_)       = printError "" al
-parseError ((TokenDollar al):_)     = printError "" al
-parseError ((TokenInt al i):_)      = printError "" al
-parseError ((TokenAssignment al):_) = printError "" al
-parseError ((TokenCross al):_)      = printError "" al
-parseError ((TokenUnion al):_)      = printError "" al
-parseError ((TokenDiff al):_)       = printError "" al
-parseError ((TokenLParen al):_)     = printError "" al
-parseError ((TokenRParen al):_)     = printError "" al
-parseError ((TokenLSquare al):_)    = printError "" al
-parseError ((TokenRSquare al):_)    = printError "" al
-parseError ((TokenAdd al):_)        = printError "" al
-parseError ((TokenSubs al):_)       = printError "" al
-parseError ((TokenDiv al):_)        = printError "" al
-parseError ((TokenMul al):_)        = printError "" al
-parseError ((TokenMod al):_)        = printError "" al
-parseError ((TokenAnd al):_)        = printError "" al
-parseError ((TokenOr al):_)         = printError "" al
-parseError ((TokenNeg al):_)        = printError "" al
-parseError ((TokenTrue al):_)       = printError "" al
-parseError ((TokenFalse al):_)      = printError "" al
-parseError ((TokenComma al):_)      = printError "" al
-parseError ((TokenDot al):_)        = printError "" al
-parseError ((TokenPipe al):_)       = printError "" al
-parseError ((TokenEndLine al):_)    = printError "" al
-parseError ((TokenNotEq al):_)      = printError "" al
-parseError ((TokenEq al):_)         = printError "" al
-parseError ((TokenLessEq al):_)     = printError "" al
-parseError ((TokenGreaterEq al):_)  = printError "" al
-parseError ((TokenLess al):_)       = printError "" al
-parseError ((TokenGreater al):_)    = printError "" al
-parseError ((TokenString al s):_)   = printError "" al
-parseError ((TokenFileName al s):_) = printError "" al
-parseError ((TokenVar al s):_)      = printError "" al
-  
+parseError ((TokenCSV al):_)        = printError "a 'csv' declaration" al
+parseError ((TokenImport al):_)     = printError "an 'import' statement" al
+parseError ((TokenPrint al):_)      = printError "a 'print' statement" al
+parseError ((TokenAsc al):_)        = printError "an 'asc' statement" al
+parseError ((TokenDesc al):_)       = printError "a 'desc' statement" al
+parseError ((TokenSelect al):_)     = printError "a 'select' statement" al
+parseError ((TokenReform al):_)     = printError "a 'reform' statement" al
+parseError ((TokenUpdate al):_)     = printError "an 'update' statement" al
+parseError ((TokenWrite al):_)      = printError "a 'write' statement" al
+parseError ((TokenArity al):_)      = printError "an 'arity' statement" al
+parseError ((TokenIf al):_)         = printError "an 'if' statement" al
+parseError ((TokenThen al):_)       = printError "a '->' notation" al
+parseError ((TokenDollar al):_)     = printError "a '$' notation" al
+parseError ((TokenInt al i):_)      = printError ("a number " ++ show i) al
+parseError ((TokenAssignment al):_) = printError "an assignment '='" al
+parseError ((TokenCross al):_)      = printError "a cartesian product 'x'" al
+parseError ((TokenUnion al):_)      = printError "a union '++'" al
+parseError ((TokenDiff al):_)       = printError "a diff '--'" al
+parseError ((TokenLParen al):_)     = printError "a '('" al
+parseError ((TokenRParen al):_)     = printError "a ')'" al
+parseError ((TokenLSquare al):_)    = printError "a '['" al
+parseError ((TokenRSquare al):_)    = printError "a ']'" al
+parseError ((TokenAdd al):_)        = printError "an addition '+'" al
+parseError ((TokenSubs al):_)       = printError "a substraction '-'" al
+parseError ((TokenDiv al):_)        = printError "a division '/'" al
+parseError ((TokenMul al):_)        = printError "a multiplication '*'" al
+parseError ((TokenMod al):_)        = printError "a modulo operator '%'" al
+parseError ((TokenAnd al):_)        = printError "an AND '&&'" al
+parseError ((TokenOr al):_)         = printError "an OR '||'" al
+parseError ((TokenNeg al):_)        = printError "a negation '!'" al
+parseError ((TokenTrue al):_)       = printError "a 'true' statement" al
+parseError ((TokenFalse al):_)      = printError "a 'false' statement" al
+parseError ((TokenComma al):_)      = printError "a comma ','" al
+parseError ((TokenDot al):_)        = printError "a dot '.'" al
+parseError ((TokenPipe al):_)       = printError "a pipe '|'" al
+parseError ((TokenEndLine al):_)    = printError "a semicolon ';" al
+parseError ((TokenNotEq al):_)      = printError "a not-equal '!=' operator" al
+parseError ((TokenEq al):_)         = printError "an equal '==' operator" al
+parseError ((TokenLessEq al):_)     = printError "a less-or-equal '<=' operator" al
+parseError ((TokenGreaterEq al):_)  = printError "a greater-or-equal '>=' operator" al
+parseError ((TokenLess al):_)       = printError "a less '<' operator" al
+parseError ((TokenGreater al):_)    = printError "a greater '>' operator" al
+parseError ((TokenString al s):_)   = printError ("a string " ++ s) al
+parseError ((TokenFileName al s):_) = printError ("a file name " ++ s) al
+parseError ((TokenVar al s):_)      = printError ("a variable " ++ s) al
+
 printError :: [Char] -> AlexPosn -> a
-printError m (AlexPn _ l c) = error $ m ++ show(l) ++ ":" ++ show(c)
+printError m (AlexPn _ line col) = error $ concat [ "Wasn't Expecting ", m, " (at: line ", show line, " , column ", show col, ")"]
 
 -- A program is a sequence of terms. Terms are separated by ';'
 data Prog = Term Expr | Terms Expr Prog deriving Show

@@ -24,6 +24,7 @@ noParse e = do let err =  show e
                return ()
 
 
+
 --main :: IO ()
 --main = catch main' noLex
 --
@@ -37,4 +38,3 @@ noParse e = do let err =  show e
 --noLex e = do let err =  show e
 --             hPutStr stderr ("Problem with lexing: " ++ err)
 --             return ()
-
