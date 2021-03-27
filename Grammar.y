@@ -54,10 +54,10 @@ import Tokens
 
   '!='          { TokenNotEq _ }
   '=='          { TokenEq _ }
-  '>='          { TokenLessEq _ }
-  '<='          { TokenMoreEq _ }
+  '>='          { TokenGreaterEq _ }
+  '<='          { TokenLessEq _ }
   '<'           { TokenLess _ }
-  '>'           { TokenMore _ }
+  '>'           { TokenGreater _ }
   
   '='           { TokenAssignment _ }
   
@@ -66,14 +66,11 @@ import Tokens
   var           { TokenVar _ $$ }
 
 
-
 %left '+' '-' '='
 %right '/' '*' '%'
-
 %left '++' '--' 
 %right x
 %nonassoc '!=' '==' '>=' '<=' '>' '<'
-
 %left '&&' '||'  
 %right '!' 
     
@@ -134,14 +131,61 @@ MathExpr : arity Query {Arity $2}
 Operation : '==' {Equal}
           | '!=' {NotEqual}
           | '<'  {Less}
-          | '>'  {More}
-          | '>=' {LessEqual}
-          | '<=' {MoreEqual}
+          | '>'  {Greater}
+          | '>=' {GreaterEqual}
+          | '<=' {LessEqual}
 
 {     
 parseError :: [Token] -> a
 parseError [] = error "Unknown Parse Error" 
-parseError (t:ts) = error ("Parse error at line:column " ++ (tokenPosn t))
+parseError ((TokenCSV al):_)        = printError "" al
+parseError ((TokenImport al):_)     = printError "" al
+parseError ((TokenPrint al):_)      = printError "" al
+parseError ((TokenAsc al):_)        = printError "" al
+parseError ((TokenDesc al):_)       = printError "" al
+parseError ((TokenSelect al):_)     = printError "" al
+parseError ((TokenReform al):_)     = printError "" al
+parseError ((TokenUpdate al):_)     = printError "" al
+parseError ((TokenWrite al):_)      = printError "" al
+parseError ((TokenArity al):_)      = printError "" al
+parseError ((TokenIf al):_)         = printError "" al
+parseError ((TokenThen al):_)       = printError "" al
+parseError ((TokenDollar al):_)     = printError "" al
+parseError ((TokenInt al i):_)      = printError "" al
+parseError ((TokenAssignment al):_) = printError "" al
+parseError ((TokenCross al):_)      = printError "" al
+parseError ((TokenUnion al):_)      = printError "" al
+parseError ((TokenDiff al):_)       = printError "" al
+parseError ((TokenLParen al):_)     = printError "" al
+parseError ((TokenRParen al):_)     = printError "" al
+parseError ((TokenLSquare al):_)    = printError "" al
+parseError ((TokenRSquare al):_)    = printError "" al
+parseError ((TokenAdd al):_)        = printError "" al
+parseError ((TokenSubs al):_)       = printError "" al
+parseError ((TokenDiv al):_)        = printError "" al
+parseError ((TokenMul al):_)        = printError "" al
+parseError ((TokenMod al):_)        = printError "" al
+parseError ((TokenAnd al):_)        = printError "" al
+parseError ((TokenOr al):_)         = printError "" al
+parseError ((TokenNeg al):_)        = printError "" al
+parseError ((TokenTrue al):_)       = printError "" al
+parseError ((TokenFalse al):_)      = printError "" al
+parseError ((TokenComma al):_)      = printError "" al
+parseError ((TokenDot al):_)        = printError "" al
+parseError ((TokenPipe al):_)       = printError "" al
+parseError ((TokenEndLine al):_)    = printError "" al
+parseError ((TokenNotEq al):_)      = printError "" al
+parseError ((TokenEq al):_)         = printError "" al
+parseError ((TokenLessEq al):_)     = printError "" al
+parseError ((TokenGreaterEq al):_)  = printError "" al
+parseError ((TokenLess al):_)       = printError "" al
+parseError ((TokenGreater al):_)    = printError "" al
+parseError ((TokenString al s):_)   = printError "" al
+parseError ((TokenFileName al s):_) = printError "" al
+parseError ((TokenVar al s):_)      = printError "" al
+  
+printError :: [Char] -> AlexPosn -> a
+printError m (AlexPn _ l c) = error $ m ++ show(l) ++ ":" ++ show(c)
 
 -- A program is a sequence of terms. Terms are separated by ';'
 data Prog = Term Expr | Terms Expr Prog deriving Show
@@ -183,7 +227,7 @@ type Cols = [Col]
 
 data Conds = Single Cond | Neg Conds | And Conds Conds | Or Conds Conds deriving Show
 data Cond = ColCond Col Operation Col  | NumCond MathExpr Operation MathExpr | Boolean Bool  deriving Show
-data Operation = Equal | NotEqual | Less | More | LessEqual | MoreEqual deriving Show
+data Operation = Equal | NotEqual | Less | Greater | LessEqual | GreaterEqual deriving Show
 
 data MathOperation = Add | Subs | Mul | Div | Mod deriving Show
 data MathExpr = Arity Query | Number Int | Calc MathExpr MathOperation MathExpr deriving Show

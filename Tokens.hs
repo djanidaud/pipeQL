@@ -35811,104 +35811,52 @@ alex_actions = array (0 :: Int, 94)
 
 -- Each action has type :: String -> Token 
 -- The token type: 
-data Token = 
-  TokenCSV AlexPosn             | 
-  TokenImport AlexPosn          |
-  TokenPrint AlexPosn           |
-  TokenAsc AlexPosn             |
-  TokenDesc AlexPosn            |
-  TokenSelect AlexPosn          |
-  TokenReform AlexPosn          |
-  TokenUpdate AlexPosn          |
-  TokenWrite AlexPosn           |
-  TokenArity AlexPosn           |
-  TokenIf AlexPosn              |
-  TokenThen AlexPosn            |
-  TokenDollar AlexPosn          |
-  TokenInt AlexPosn Int         |
-  TokenAssignment AlexPosn      | 
-  TokenCross AlexPosn           |
-  TokenUnion AlexPosn           |
-  TokenDiff AlexPosn            |
-  TokenLParen AlexPosn          |
-  TokenRParen AlexPosn          |
-  TokenLSquare AlexPosn         |
-  TokenRSquare AlexPosn         |
-  TokenAdd AlexPosn             |
-  TokenSubs AlexPosn            |
-  TokenDiv AlexPosn             |
-  TokenMul AlexPosn             |
-  TokenMod AlexPosn             |
-  TokenAnd AlexPosn             |
-  TokenOr AlexPosn              |
-  TokenNeg AlexPosn             |
-  TokenTrue AlexPosn            |
-  TokenFalse AlexPosn           |
-  TokenComma AlexPosn           |
-  TokenDot AlexPosn             |
-  TokenPipe AlexPosn            |    
-  TokenEndLine AlexPosn         |
-  TokenNotEq AlexPosn           |
-  TokenEq AlexPosn              |
-  TokenLessEq AlexPosn          |
-  TokenMoreEq AlexPosn          |
-  TokenLess AlexPosn            |
-  TokenMore AlexPosn            |
-  TokenString AlexPosn String   |      
-  TokenFileName AlexPosn String | 
-  TokenVar AlexPosn String
-  deriving (Eq,Show) 
-
-
-tokenPosn :: Token -> String
-tokenPosn (TokenCSV al) = "1" ++ printAlexPosn al
-tokenPosn (TokenImport al) ="2" ++  printAlexPosn al
-tokenPosn (TokenPrint al) ="3" ++  printAlexPosn al
-tokenPosn (TokenAsc al) ="4" ++  printAlexPosn al
-tokenPosn (TokenDesc al) ="5" ++  printAlexPosn al
-tokenPosn (TokenSelect al) ="6" ++  printAlexPosn al
-tokenPosn (TokenReform al) = "7" ++ printAlexPosn al
-tokenPosn (TokenUpdate al) = "8" ++ printAlexPosn al
-tokenPosn (TokenWrite al) ="9" ++  printAlexPosn al
-tokenPosn (TokenArity al) ="10" ++  printAlexPosn al
-tokenPosn (TokenIf al) = "11" ++ printAlexPosn al
-tokenPosn (TokenThen al) ="12" ++  printAlexPosn al
-tokenPosn (TokenDollar al) ="13" ++  printAlexPosn al
-tokenPosn (TokenInt al i) ="14 " ++ printAlexPosn al
-tokenPosn (TokenAssignment al) ="15" ++  printAlexPosn al
-tokenPosn (TokenCross al) ="16" ++  printAlexPosn al
-tokenPosn (TokenUnion al) ="17" ++  printAlexPosn al
-tokenPosn (TokenDiff al) ="18" ++  printAlexPosn al
-tokenPosn (TokenLParen al) ="19" ++  printAlexPosn al
-tokenPosn (TokenRParen al) ="20" ++  printAlexPosn al
-tokenPosn (TokenLSquare al) ="21" ++  printAlexPosn al
-tokenPosn (TokenRSquare al) ="22" ++  printAlexPosn al
-tokenPosn (TokenAdd al) = "23" ++ printAlexPosn al
-tokenPosn (TokenSubs al) ="24" ++  printAlexPosn al
-tokenPosn (TokenDiv al) ="25" ++  printAlexPosn al
-tokenPosn (TokenMul al) ="26"++ printAlexPosn al
-tokenPosn (TokenMod al) ="27"++ printAlexPosn al
-tokenPosn (TokenAnd al) ="28"++ printAlexPosn al
-tokenPosn (TokenOr al) ="29"++ printAlexPosn al
-tokenPosn (TokenNeg al) ="30"++ printAlexPosn al
-tokenPosn (TokenTrue al) ="90"++ printAlexPosn al
-tokenPosn (TokenFalse al) ="31"++ printAlexPosn al
-tokenPosn (TokenComma al) ="32"++ printAlexPosn al
-tokenPosn (TokenDot al) ="33"++ printAlexPosn al
-tokenPosn (TokenPipe al) ="34"++ printAlexPosn al
-tokenPosn (TokenEndLine al) ="35"++ printAlexPosn al
-tokenPosn (TokenNotEq al) ="36"++ printAlexPosn al
-tokenPosn (TokenEq al) = "37"++printAlexPosn al
-tokenPosn (TokenLessEq al) ="38"++ printAlexPosn al
-tokenPosn (TokenMoreEq al) ="39"++ printAlexPosn al
-tokenPosn (TokenLess al) ="40"++ printAlexPosn al
-tokenPosn (TokenMore al) ="41"++ printAlexPosn al
-tokenPosn (TokenString al s) ="42"++ printAlexPosn al
-tokenPosn (TokenFileName al s) ="43"++ printAlexPosn al
-tokenPosn (TokenVar al s) ="44"++ printAlexPosn al
-  
-
-printAlexPosn (AlexPn a l c) = show(l) ++ ":" ++ show(c);
+data Token = TokenCSV AlexPosn
+           | TokenImport AlexPosn
+           | TokenPrint AlexPosn
+           | TokenAsc AlexPosn  
+           | TokenDesc AlexPosn
+           | TokenSelect AlexPosn
+           | TokenReform AlexPosn 
+           | TokenUpdate AlexPosn 
+           | TokenWrite AlexPosn 
+           | TokenArity AlexPosn  
+           | TokenIf AlexPosn 
+           | TokenThen AlexPosn 
+           | TokenDollar AlexPosn 
+           | TokenInt AlexPosn Int
+           | TokenAssignment AlexPosn
+           | TokenCross AlexPosn
+           | TokenUnion AlexPosn
+           | TokenDiff AlexPosn
+           | TokenLParen AlexPosn    
+           | TokenRParen AlexPosn
+           | TokenLSquare AlexPosn
+           | TokenRSquare AlexPosn
+           | TokenAdd AlexPosn
+           | TokenSubs AlexPosn 
+           | TokenDiv AlexPosn
+           | TokenMul AlexPosn
+           | TokenMod AlexPosn 
+           | TokenAnd AlexPosn
+           | TokenOr AlexPosn 
+           | TokenNeg AlexPosn 
+           | TokenTrue AlexPosn
+           | TokenFalse AlexPosn
+           | TokenComma AlexPosn
+           | TokenDot AlexPosn
+           | TokenPipe AlexPosn 
+           | TokenEndLine AlexPosn 
+           | TokenNotEq AlexPosn
+           | TokenEq AlexPosn 
+           | TokenLessEq AlexPosn 
+           | TokenGreaterEq AlexPosn
+           | TokenLess AlexPosn 
+           | TokenGreater AlexPosn
+           | TokenString AlexPosn String
+           | TokenFileName AlexPosn String 
+           | TokenVar AlexPosn String
+           deriving (Eq,Show) 
 
 alex_action_2 =  \pos s -> TokenCSV pos 
 alex_action_3 =  \pos s -> TokenImport pos 
@@ -35929,7 +35877,7 @@ alex_action_17 =  \pos s -> TokenCross pos
 alex_action_18 =  \pos s -> TokenUnion pos 
 alex_action_19 =  \pos s -> TokenDiff pos 
 alex_action_20 =  \pos s -> TokenLParen pos 
-alex_action_21 =  \pos s -> TokenRParen pos
+alex_action_21 =  \pos s -> TokenRParen pos 
 alex_action_22 =  \pos s -> TokenLSquare pos 
 alex_action_23 =  \pos s -> TokenRSquare pos 
 alex_action_24 =  \pos s -> TokenAdd pos 
@@ -35939,22 +35887,22 @@ alex_action_27 =  \pos s -> TokenMul pos
 alex_action_28 =  \pos s -> TokenMod pos 
 alex_action_29 =  \pos s -> TokenAnd pos 
 alex_action_30 =  \pos s -> TokenOr pos 
-alex_action_31 =  \pos s -> TokenNeg pos
-alex_action_32 =  \pos s -> TokenTrue pos
-alex_action_33 =  \pos s -> TokenFalse pos
+alex_action_31 =  \pos s -> TokenNeg pos 
+alex_action_32 =  \pos s -> TokenTrue pos 
+alex_action_33 =  \pos s -> TokenFalse pos 
 alex_action_34 =  \pos s -> TokenComma pos 
 alex_action_35 =  \pos s -> TokenDot pos 
 alex_action_36 =  \pos s -> TokenPipe pos 
 alex_action_37 =  \pos s -> TokenEndLine pos 
 alex_action_38 =  \pos s -> TokenNotEq pos 
 alex_action_39 =  \pos s -> TokenEq pos 
-alex_action_40 =  \pos s -> TokenLessEq pos 
-alex_action_41 =  \pos s -> TokenMoreEq pos 
+alex_action_40 =  \pos s -> TokenGreaterEq pos 
+alex_action_41 =  \pos s -> TokenLessEq pos 
 alex_action_42 =  \pos s -> TokenLess pos 
-alex_action_43 =  \pos s -> TokenMore pos 
-alex_action_44 =  \pos s -> TokenString pos s
-alex_action_45 =  \pos s -> TokenFileName pos s
-alex_action_46 =  \pos s -> TokenVar pos s
+alex_action_43 =  \pos s -> TokenGreater pos 
+alex_action_44 =  \pos s -> TokenString pos s 
+alex_action_45 =  \pos s -> TokenFileName pos s 
+alex_action_46 =  \pos s -> TokenVar pos s 
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- -----------------------------------------------------------------------------
 -- ALEX TEMPLATE
