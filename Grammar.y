@@ -6,9 +6,7 @@ import Tokens
 %name parseCalc 
 %tokentype { Token } 
 %error { parseError }
-
-
-    
+ 
 %token
   csv           { TokenCSV _ } 
   import        { TokenImport _ }
@@ -65,27 +63,35 @@ import Tokens
   fileName      { TokenFileName _ $$ }
   var           { TokenVar _ $$ }
 
-
-%left '+' '-' '='
-%right '/' '*' '%'
-%left '++' '--' 
+%left '++' '--' '|'
 %right x
+
+%left '('
+%right ')'
+
+%left '+' '-' '=' 
+%right '/' '*' '%'
+
 %nonassoc '!=' '==' '>=' '<=' '>' '<'
 %left '&&' '||'  
 %right '!' 
     
 %%     
-Prog : Expr ';'             { Term $1 } 
-     | Expr ';' Prog        { Terms $1 $3 } 
+Prog : {[]}
+     | Expr ';' Prog {$1 : $3}      
 
 Expr : csv var '=' Query    { Init $2 $4 }
      | csv var              { UnInit $2 }
      | Query                { Expression $1 }
     
+
 Query : CsvExpr             { PipeEnd $1 }
       | CsvExpr '|' Query   { PipeLine $1 $3 }
-      | '(' Query ')'       { $2 }
-     
+      
+
+  
+
+
 CsvExpr : import fileName                   { Import $2 }
         | asc                               { Asc }
         | desc                              { Desc }
@@ -96,16 +102,19 @@ CsvExpr : import fileName                   { Import $2 }
         | var                               { VarName $1 }
         | write word                        { Write $2 }
         | if '(' Conds ')' '->' Query ';'   { If $3 $6 } 
-        | CsvExpr x CsvExpr                 { FullBinary (Cross $1 $3) }
-        | CsvExpr '++' CsvExpr              { FullBinary (Union $1 $3) }
-        | CsvExpr '--' CsvExpr              { FullBinary (Diff $1 $3) }
+        | '(' CsvExpr ')'                   { $2 }
         
+        | Query x Query                { FullBinary (Cross $1 $3) }
+        | Query '++' Query              { FullBinary (Union $1 $3) }
+        | Query '--' Query             { FullBinary (Diff $1 $3) }
+
+    
 
 Cols : Col {[$1]}
      | Col ',' Cols {$1 : $3}
 
 Col : dollar int    {Index $2}
-    | word   {Filler $1}
+    | word          {Filler $1}
 
 Conds : Cond             { Single $1 }
       | '!' Conds        { Neg $2 }
@@ -189,7 +198,8 @@ printError :: [Char] -> AlexPosn -> a
 printError m (AlexPn _ line col) = error $ concat [ "Wasn't Expecting ", m, " (at: line ", show line, " , column ", show col, ")"]
 
 -- A program is a sequence of terms. Terms are separated by ';'
-data Prog = Term Expr | Terms Expr Prog deriving Show
+-- data Prog = ProgEnd | Term Expr | Terms Expr Prog deriving Show
+type Prog = [Expr]
                
 data Expr = UnInit String     -- Uninitialised var declaration
           | Init String Query -- Initialised var declaration
@@ -211,7 +221,7 @@ data CsvExpr = Import String
              | VarName String 
              | Write String  
              | If Conds Query 
-             | FullBinary (Binary CsvExpr CsvExpr)
+             | FullBinary (Binary Query Query)
              deriving Show
 
 

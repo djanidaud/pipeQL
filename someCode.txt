@@ -2,33 +2,4 @@
 csv A = import A.csv;
 csv B = import B.csv;
 
-A x B | asc | print;
-
-
-// Problem II:
-csv A = import A.csv;
-A | select ($1 == $2) | reform [$3, $2] | asc | print;
-
-
-// Problem III:
-csv P = import P.csv;
-csv Q = import q.csv;
-
-
-P x Q | select ($1 == $5)
-      | if ($2 == "") -> update $2 $6;
-      | if ($3 == "") -> update $3 $7;
-      | if ($4 == "") -> update $4 $8;
-      | reform [$1, $2, $3, $4]
-      | asc 
-      | print;
-      
-      
-// Problem IV:
-csv A = import A.csv;
-A | select ($2 != "") | asc | print;
-
-
-// Problem V:
-csv A = import A.csv;
-A | reform [$1, "0", $1] | asc | print;
+csv C = import A.csv ++ B | print; 

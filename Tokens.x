@@ -71,7 +71,7 @@ tokens :-
   
 
 {
--- Each action has type :: String -> Token 
+-- Each action has type ::AlexPosn -> String -> Token 
 -- The token type: 
 data Token = TokenCSV AlexPosn
            | TokenImport AlexPosn
