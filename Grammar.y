@@ -64,7 +64,7 @@ import Tokens
   var           { TokenVar _ $$ }
 
 %left '++' '--' '|'
-%right x
+%left x
 
 %left '('
 %right ')'
@@ -83,14 +83,10 @@ Prog : {[]}
 Expr : csv var '=' Query    { Init $2 $4 }
      | csv var              { UnInit $2 }
      | Query                { Expression $1 }
-    
-
+     
 Query : CsvExpr             { PipeEnd $1 }
-      | CsvExpr '|' Query   { PipeLine $1 $3 }
-      
-
-  
-
+      | Query '|' Query     { PipeLine $1 $3 }
+      | '(' Query  ')'      {  $2 }
 
 CsvExpr : import fileName                   { Import $2 }
         | asc                               { Asc }
@@ -102,11 +98,10 @@ CsvExpr : import fileName                   { Import $2 }
         | var                               { VarName $1 }
         | write word                        { Write $2 }
         | if '(' Conds ')' '->' Query ';'   { If $3 $6 } 
-        | '(' CsvExpr ')'                   { $2 }
         
-        | Query x Query                { FullBinary (Cross $1 $3) }
-        | Query '++' Query              { FullBinary (Union $1 $3) }
-        | Query '--' Query             { FullBinary (Diff $1 $3) }
+        | Query x Query                     { FullBinary (Cross $1 $3) }
+        | Query '++' Query                  { FullBinary (Union $1 $3) }
+        | Query '--' Query                  { FullBinary (Diff $1 $3) }
 
     
 
@@ -207,7 +202,7 @@ data Expr = UnInit String     -- Uninitialised var declaration
           deriving Show
 
 data Query = PipeEnd CsvExpr       -- single statement, which returns a CSV 
-           | PipeLine CsvExpr Query -- sequence of pipes, separated by "|". Ends with a "PipeEnd"
+           | PipeLine Query Query  -- sequence of pipes, separated by "|". Ends with a "PipeEnd"
            deriving Show
 
 -- A CSV Expr is an expression which takes a CSV as input (if any) and returns a new CSV

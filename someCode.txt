@@ -1,5 +1,9 @@
 // Problem I:
-csv A = import A.csv;
+csv A = import A.csv | print;
 csv B = import B.csv;
 
-csv C = import A.csv ++ B | print; 
+csv C = (A | print) x B | print | asc | print; 
+
+A | print;
+
+C | print;

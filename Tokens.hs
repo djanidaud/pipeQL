@@ -35809,7 +35809,7 @@ alex_actions = array (0 :: Int, 94)
 
 {-# LINE 73 "Tokens.x" #-}
 
--- Each action has type :: String -> Token 
+-- Each action has type ::AlexPosn -> String -> Token 
 -- The token type: 
 data Token = TokenCSV AlexPosn
            | TokenImport AlexPosn
