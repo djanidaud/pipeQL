@@ -63,11 +63,11 @@ import Tokens
   fileName      { TokenFileName _ $$ }
   var           { TokenVar _ $$ }
 
-%left '++' '--' '|'
+%left '++' '--' '|' dollar
 %left x
 
-%left '('
-%right ')'
+%left '(' arity
+%right ')' 
 
 %left '+' '-' '=' 
 %right '/' '*' '%'
@@ -96,7 +96,7 @@ CsvExpr : import fileName                   { Import $2 }
         | select '(' Conds ')'              { Select $3 }
         | update Col Col                    { Update $2 $3 }
         | var                               { VarName $1 }
-        | write word                        { Write $2 }
+        | write fileName                    { Write $2 }
         | if '(' Conds ')' '->' Query ';'   { If $3 $6 } 
         
         | Query x Query                     { FullBinary (Cross $1 $3) }
@@ -104,12 +104,11 @@ CsvExpr : import fileName                   { Import $2 }
         | Query '--' Query                  { FullBinary (Diff $1 $3) }
 
     
-
 Cols : Col {[$1]}
      | Col ',' Cols {$1 : $3}
 
-Col : dollar int    {Index $2}
-    | word          {Filler $1}
+Col : dollar MathExpr    {Index $2}
+    | word               {Filler $1}
 
 Conds : Cond             { Single $1 }
       | '!' Conds        { Neg $2 }
@@ -122,14 +121,14 @@ Cond : Col Operation Col {ColCond $1 $2 $3}
      | true   {Boolean True}
      | false  {Boolean False}
     
-MathExpr : arity Query {Arity $2}
-         | int {Number $1}
+MathExpr : arity Query           {Arity $2}
+         | int                   {Number $1}
          | MathExpr '+' MathExpr {Calc $1 Add $3}
          | MathExpr '-' MathExpr {Calc $1 Subs $3}
          | MathExpr '/' MathExpr {Calc $1 Div $3}
          | MathExpr '*' MathExpr {Calc $1 Mul $3}
          | MathExpr '%' MathExpr {Calc $1 Mod $3}
-         | '(' MathExpr ')' { $2 }
+         | '(' MathExpr ')'      { $2 }
          
 
 Operation : '==' {Equal}
@@ -192,18 +191,22 @@ parseError ((TokenVar al s):_)      = printError ("a variable " ++ s) al
 printError :: [Char] -> AlexPosn -> a
 printError m (AlexPn _ line col) = error $ concat [ "Wasn't Expecting ", m, " (at: line ", show line, " , column ", show col, ")"]
 
+
 -- A program is a sequence of terms. Terms are separated by ';'
 -- data Prog = ProgEnd | Term Expr | Terms Expr Prog deriving Show
 type Prog = [Expr]
                
+
 data Expr = UnInit String     -- Uninitialised var declaration
           | Init String Query -- Initialised var declaration
           | Expression Query  -- A query
           deriving Show
 
+
 data Query = PipeEnd CsvExpr       -- single statement, which returns a CSV 
            | PipeLine Query Query  -- sequence of pipes, separated by "|". Ends with a "PipeEnd"
            deriving Show
+
 
 -- A CSV Expr is an expression which takes a CSV as input (if any) and returns a new CSV
 data CsvExpr = Import String 
@@ -228,7 +231,7 @@ data Binary a b = Cross a b  -- Cartessian (Cross) Product
                 deriving Show
 
 
-data Col = Index Int | Filler String deriving Show
+data Col = Index MathExpr | Filler String deriving Show
 type Cols = [Col]
 
 data Conds = Single Cond | Neg Conds | And Conds Conds | Or Conds Conds deriving Show

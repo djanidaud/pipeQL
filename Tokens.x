@@ -65,9 +65,9 @@ tokens :-
   \<            { \pos s -> TokenLess pos }
   \>            { \pos s -> TokenGreater pos }
   
-  \"[$alpha $digit \_ \’]*\"         { \pos s -> TokenString pos s }
-  $alpha [$alpha $digit \_ \’]*.csv  { \pos s -> TokenFileName pos s }
-  $alpha [$alpha $digit \_ \’]*      { \pos s -> TokenVar pos s }
+  \"[$alpha $digit \_ \’]*\"             { \pos s -> TokenString pos (init.tail $ s) }
+  \"$alpha [$alpha $digit \_ \’]*.csv\"  { \pos s -> TokenFileName pos (init.tail $ s) }
+  $alpha [$alpha $digit \_ \’]*          { \pos s -> TokenVar pos s }
   
 
 {

@@ -1,6 +1,7 @@
+// Problem I:
+csv A = import "A.csv";
+csv B = import "B.csv";
 
--- Problem I:
-csv A = import A.csv;
-csv B = import B.csv;
-
-A x B | asc | print;
+A ++ B | if ($0 == "1") -> update $0 "ddd";
+       | print;
+    
