@@ -7,10 +7,11 @@ import Tokens
 %tokentype { Token } 
 %error { parseError }
  
+
 %token
-  csv           { TokenCSV _ } 
+  csv           { TokenCSV _ }
+  query         { TokenQuery _ } 
   import        { TokenImport _ }
-  
   print         { TokenPrint _ }
   asc           { TokenAsc _ }
   desc          { TokenDesc _ }
@@ -18,6 +19,10 @@ import Tokens
   reform        { TokenReform _ }
   update        { TokenUpdate _ }
   write         { TokenWrite _ }
+  note          { TokenNote _ }
+  unique        { TokenUnique _ }
+  err           { TokenError _ }
+  id            { TokenId _ }
   arity         { TokenArity _ }
   if            { TokenIf _ }
   '->'          { TokenThen _ }            
@@ -46,7 +51,8 @@ import Tokens
   true          { TokenTrue _ }
   false         { TokenFalse _ }
 
-  ','           { TokenComma _ }
+  ','           { TokenComma _ } 
+  '.'           { TokenDot _ }
   '|'           { TokenPipe _ }
   ';'           { TokenEndLine _ }
 
@@ -82,6 +88,7 @@ Prog : {[]}
 
 Expr : csv var '=' Query    { Init $2 $4 }
      | csv var              { UnInit $2 }
+     | query var '=' Query  { Method $2 $4 }
      | Query                { Expression $1 }
      
 Query : CsvExpr             { PipeEnd $1 }
@@ -96,7 +103,10 @@ CsvExpr : import fileName                   { Import $2 }
         | select '(' Conds ')'              { Select $3 }
         | update Col Col                    { Update $2 $3 }
         | var                               { VarName $1 }
-        | write fileName                    { Write $2 }
+        | write fileName                    { Write $2 } 
+        | note word                         { Note $2 }
+        | unique                            { Unique }
+        | err word                          { Error $2 }
         | if '(' Conds ')' '->' Query ';'   { If $3 $6 } 
         
         | Query x Query                     { FullBinary (Cross $1 $3) }
@@ -104,7 +114,7 @@ CsvExpr : import fileName                   { Import $2 }
         | Query '--' Query                  { FullBinary (Diff $1 $3) }
 
     
-Cols : Col {[$1]}
+Cols :  Col {[$1]}
      | Col ',' Cols {$1 : $3}
 
 Col : dollar MathExpr    {Index $2}
@@ -116,12 +126,15 @@ Conds : Cond             { Single $1 }
       | Conds '||' Conds { Or $1 $3 }
       | '(' Conds ')'    { $2 }
 
-Cond : Col Operation Col {ColCond $1 $2 $3}
-     | MathExpr Operation MathExpr {NumCond $1 $2 $3}
+Cond : Col Operation Col           { ColCond $1 $2 $3 }
+     | MathExpr Operation MathExpr { NumCond $1 $2 $3 }
+     | id Operation MathExpr       { IdCond  $2 $3 }
+     | MathExpr Operation id       { IdCond  (mirrorOperation $2) $1 }
      | true   {Boolean True}
      | false  {Boolean False}
     
 MathExpr : arity Query           {Arity $2}
+         | arity                 {ContextArity}
          | int                   {Number $1}
          | MathExpr '+' MathExpr {Calc $1 Add $3}
          | MathExpr '-' MathExpr {Calc $1 Subs $3}
@@ -139,10 +152,17 @@ Operation : '==' {Equal}
           | '<=' {LessEqual}
 
 {     
-
+-- dollar MathExpr '.' '.' dollar MathExpr ',' Cols {$1 : $3}
+mirrorOperation Less = Greater
+mirrorOperation Greater = Less
+mirrorOperation LessEqual = GreaterEqual
+mirrorOperation GreaterEqual = LessEqual
+mirrorOperation o = o
+ 
 parseError :: [Token] -> a
 parseError [] = error "Unknown Parse Error" 
 parseError ((TokenCSV al):_)        = printError "a 'csv' declaration" al
+parseError ((TokenQuery al):_)      = printError "a 'query' declaration" al
 parseError ((TokenImport al):_)     = printError "an 'import' statement" al
 parseError ((TokenPrint al):_)      = printError "a 'print' statement" al
 parseError ((TokenAsc al):_)        = printError "an 'asc' statement" al
@@ -151,6 +171,10 @@ parseError ((TokenSelect al):_)     = printError "a 'select' statement" al
 parseError ((TokenReform al):_)     = printError "a 'reform' statement" al
 parseError ((TokenUpdate al):_)     = printError "an 'update' statement" al
 parseError ((TokenWrite al):_)      = printError "a 'write' statement" al
+parseError ((TokenNote al):_)      = printError "a 'note' statement" al
+parseError ((TokenUnique al):_)      = printError "a 'unique' statement" al
+parseError ((TokenError al):_)      = printError "an 'error' statement" al
+parseError ((TokenId al):_)      = printError "an 'id' statement" al
 parseError ((TokenArity al):_)      = printError "an 'arity' statement" al
 parseError ((TokenIf al):_)         = printError "an 'if' statement" al
 parseError ((TokenThen al):_)       = printError "a '->' notation" al
@@ -197,9 +221,10 @@ printError m (AlexPn _ line col) = error $ concat [ "Wasn't Expecting ", m, " (a
 type Prog = [Expr]
                
 
-data Expr = UnInit String     -- Uninitialised var declaration
-          | Init String Query -- Initialised var declaration
-          | Expression Query  -- A query
+data Expr = UnInit String       -- Uninitialised var declaration
+          | Init String Query   -- Initialised var declaration
+          | Method String Query -- Method declaration
+          | Expression Query    -- A query
           deriving Show
 
 
@@ -217,7 +242,10 @@ data CsvExpr = Import String
              | Select Conds 
              | Update Col Col 
              | VarName String 
-             | Write String  
+             | Write String 
+             | Note String
+             | Unique
+             | Error String
              | If Conds Query 
              | FullBinary (Binary Query Query)
              deriving Show
@@ -234,10 +262,11 @@ data Binary a b = Cross a b  -- Cartessian (Cross) Product
 data Col = Index MathExpr | Filler String deriving Show
 type Cols = [Col]
 
+
 data Conds = Single Cond | Neg Conds | And Conds Conds | Or Conds Conds deriving Show
-data Cond = ColCond Col Operation Col  | NumCond MathExpr Operation MathExpr | Boolean Bool  deriving Show
+data Cond = ColCond Col Operation Col  | NumCond MathExpr Operation MathExpr | IdCond Operation MathExpr | Boolean Bool  deriving Show
 data Operation = Equal | NotEqual | Less | Greater | LessEqual | GreaterEqual deriving Show
 
 data MathOperation = Add | Subs | Mul | Div | Mod deriving Show
-data MathExpr = Arity Query | Number Int | Calc MathExpr MathOperation MathExpr deriving Show
+data MathExpr = ContextArity | Arity Query | Number Int | Calc MathExpr MathOperation MathExpr deriving Show
 } 

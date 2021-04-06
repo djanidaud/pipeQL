@@ -1,29 +1,27 @@
 import Tokens ( alexScanTokens )
 import Grammar
-import System.Environment ( getArgs )
-import Control.Exception ( ErrorCall, catch )
-import System.IO ( stderr, hPutStr )
-
-
+import System.Environment 
+import Control.Exception
+import System.IO 
 import Data.List 
 import Control.Monad
 import Data.Maybe
 import Data.List
 import qualified Data.Map as Map
 
--- update 
--- binary
--- boolean expr
+type Entry = [String];
+type CSV = IO [Entry];
+data Variable = Value CSV | Procedure Query Environment
+type Environment = Map.Map String Variable
+type State = (CSV, Environment, Query)  
 
-type CSV = IO [[String]];
-type Environment = Map.Map String [[String]] 
-type QueryState  =  (CSV, Environment, Query)  
 
 main :: IO ()
 main = catch main' noParse
        where
        noParse :: ErrorCall -> IO ()
        noParse = hPutStr stderr.show
+
 
 main' :: IO ()
 main' = do (fileName : _ ) <- getArgs 
@@ -37,65 +35,97 @@ main' = do (fileName : _ ) <- getArgs
 emptyCSV :: CSV
 emptyCSV = pure []
 
-                              
+
 evalProgLoop :: Prog -> Environment -> IO ()
 evalProgLoop [] _ = return () 
-evalProgLoop (e:prog) env = do let (maybeVar, csv) = evalStatement e env
-                               v <- csv
-                               let env1 = addEntry maybeVar v env
+evalProgLoop (e:prog) env = do let (maybeVar, var) = evalStatement e env
+                               var' <- strictlyEval var
+                               let env1 = addEntry maybeVar var' env
                                evalProgLoop prog env1 
+  
+
+strictlyEval :: Variable -> IO Variable
+strictlyEval (Value mxs) = do xs <- mxs; return $ Value $ return xs
+strictlyEval p = return p   
 
 
-addEntry:: Maybe String -> [[String]] -> Environment -> Environment
+addEntry:: Maybe String -> Variable -> Environment -> Environment
 addEntry Nothing _ env = env
 addEntry (Just name) val env = Map.insert name val env
-                               
-                              
-evalStatement:: Expr -> Environment -> (Maybe String, CSV)          
-evalStatement (UnInit name) _        = (Just name, emptyCSV)
-evalStatement (Init name query) env  = (Just name, evalQuery (emptyCSV, env, query))
-evalStatement (Expression query) env = (Nothing, evalQuery (emptyCSV, env, query))     
 
 
-evalQuery:: QueryState -> CSV                
-evalQuery (csv, env, PipeEnd pipe) = evalQuery1 pipe csv env        
+evalStatement:: Expr -> Environment -> (Maybe String, Variable)          
+evalStatement (UnInit name) _         = (Just name, Value emptyCSV)
+evalStatement (Init name query) env   = (Just name, Value $ evalQuery (emptyCSV, env, query))
+evalStatement (Method name query) env = (Just name, Procedure query env)
+evalStatement (Expression query) env  = (Nothing, Value $ evalQuery (emptyCSV, env, query))     
+
+
+evalQuery:: State -> CSV                
 evalQuery (csv, env, PipeLine pipe query) = let csv1 = evalQuery (csv, env, pipe) in evalQuery (csv1, env, query) 
-                                          
-                                          
+evalQuery (csv, env, PipeEnd pipe) = evalQuery1 pipe csv env                           
+                    
+
 evalQuery1 :: CsvExpr -> CSV -> Environment -> CSV
-evalQuery1 (VarName name) _ env     = getBinding name env
+evalQuery1 Asc csv _                = strictFilter sort csv
+evalQuery1 Desc csv _               = strictFilter (sortBy (flip compare)) csv
+evalQuery1 Unique csv _             = strictFilter (map head . group . sort) csv
+evalQuery1 (Import name) _  _       = strictFilter (fmap (splitOn ',').lines) (readFile name)
+evalQuery1 (Select conds) csv _     = strictFilter (select conds) csv
+evalQuery1 (Update col1 col2) csv _ = strictFilter (map (\x -> update x col1 col2)) csv
+evalQuery1 (Reform cols) csv _      = strictFilter (reform cols) csv
+evalQuery1 Print csv _              = strictPipe   (putStrLn.toString) csv
+evalQuery1 (Write name) csv _       = strictPipe   (writeFile name.toString) csv
+evalQuery1 (Note message) csv _     = strictPipe   (\_ -> putStrLn message) csv
+evalQuery1 (Error message) csv _    = strictPipe   (\_ -> error message) csv
+evalQuery1 (VarName name) csv env   = getBinding name env csv
 evalQuery1 (FullBinary b) _ env     = binaryEval b env
-evalQuery1 Asc mxs _                = strictFilter sort mxs
-evalQuery1 Desc mxs _               = strictFilter (sortBy (flip compare)) mxs
-evalQuery1 Print mxs _              = strictPipe   (putStrLn.toString) mxs
-evalQuery1 (Import name) _ _        = strictFilter (fmap (splitOn ',').lines) (readFile name)
-evalQuery1 (Write name) mxs _       = strictPipe   (writeFile name.toString) mxs
-evalQuery1 (Select conds) mxs _     = strictFilter (filter (conditions conds)) mxs
-evalQuery1 (Update col1 col2) mxs _ = strictFilter (map (\x -> change x col1 col2)) mxs
-evalQuery1 (Reform cols) mxs _      = strictFilter (reform cols) mxs
-evalQuery1 (If conds query) mxs env   = do xs <- mxs
-                                           let mapped = map (\x -> 
-                                                  if(conditions conds x) then (evalQuery (pure [x], env, query)) else pure [x]
-                                                  ) xs
-                                           mm <- sequence mapped
-                                           return $ map concat mm
-
-                                           
-                                        
-             
-
-getBinding:: String -> Environment -> CSV
-getBinding varName env | isNothing entry = error "Undefined Variable"
-                       | otherwise = return $!fromJust entry
-                         where
-                         entry :: Maybe [[String]]
-                         entry = Map.lookup varName env
+evalQuery1 (If conds query) csv env = resolveIf conds (csv, env, query) 
 
 
-reform :: [Col] -> [[String]] -> [[String]]
+isValue :: Variable -> Bool
+isValue (Value _) = True
+isValue _ = False
+
+
+getBinding:: String -> Environment -> CSV -> CSV
+getBinding varName env csv | isNothing entry = error $ varName ++ " is undefined!"
+                           | isValue var = val
+                           | otherwise = evalQuery (csv, env1, query)
+                             where
+                             entry = Map.lookup varName env
+                             var = fromJust entry
+                             (Value val) = var
+                             (Procedure query env1) = var
+
+
+resolveIf :: Conds -> State -> CSV
+resolveIf conds (csv, env, query) = do xs <- csv
+                                       let indexed = zip xs [0..]
+                                       let mapped = map (\(x,i) -> 
+                                                        if(conditions conds (x,i)) 
+                                                        then liftM concat (evalQuery (pure [x], env, query)) 
+                                                        else pure x 
+                                                    ) indexed
+                                       sequence mapped
+
+reform :: [Col] -> [Entry] -> [Entry]
 reform cols = map (\entry -> map (getEntryValue entry) cols)
 
 
+select :: Conds -> [Entry] -> [Entry]
+select conds xs = [fst x | x <- zip xs [0..], conditions conds x]
+
+
+update :: Entry -> Col -> Col -> Entry 
+update [] _ _ = []
+update vs (Filler f) col2 = map (\v -> if (v == f) then getEntryValue vs col2 else v) vs
+update vs (Index i) col2 = beginning ++ [getEntryValue vs col2] ++ end
+                           where
+                           num = mathCalc i vs :: Int 
+                           beginning = take num vs
+                           end = drop (num + 1) vs
+         
 
 -- A strict pipe is a pipe which doesn't modify the input CSV, it only performs some side-effects.
 -- It is 'strict' because it strictly evaluates the input csv before outputting it to the next pipe.
@@ -112,7 +142,7 @@ strictFilter f mxs = do xs <- mxs
                         return $! f xs
 
 
-toString :: [[String]] -> String
+toString :: [Entry] -> String
 toString = intercalate "\n".map (intercalate ",")                                
 
 
@@ -139,21 +169,28 @@ splitOn c ls = (takeWhile (/=c) ls) : splitOn' c (dropWhile (/=c) ls)
                                         | otherwise = []
 
 
-getArity :: [[String]] -> Int 
+getArity :: [Entry] -> Int 
 getArity = length.head
 
 
-conditions :: Conds -> [String] -> Bool
-conditions (Single cond) entry = codition cond entry 
+conditions :: Conds -> (Entry, Int) -> Bool
+conditions (Single cond) entry = condition cond entry
 conditions (Neg conds) entry = not $ conditions conds entry
 conditions (And conds1 conds2) entry = conditions conds1 entry && conditions conds2 entry
 conditions (Or conds1 conds2) entry = conditions conds1 entry || conditions conds2 entry
 
 
-codition :: Cond -> [String] ->  Bool
-codition (Boolean bool) _  = bool 
-codition (ColCond col1 operation col2) entry = boolOperation operation (getEntryValue entry col1) (getEntryValue entry col2)
-codition (NumCond a operation b) _ = boolOperation operation (mathCalc a) (mathCalc b)                                               
+condition :: Cond -> (Entry, Int) -> Bool
+condition (Boolean bool) _ = bool 
+condition (IdCond op expr) (entry, id) = boolOperation op id (mathCalc expr entry) 
+condition (ColCond col1 op col2) (entry, _) = boolOperation op (getEntryValue entry col1) (getEntryValue entry col2)
+condition (NumCond a op b) (entry, _) = boolOperation op (mathCalc a entry) (mathCalc b entry)                                               
+
+
+mathCalc :: MathExpr -> Entry -> Int
+mathCalc ContextArity csv = length csv
+mathCalc (Number n) _ = n
+mathCalc (Calc mathExpr1 op mathExpr2) csv = mathOperation op (mathCalc mathExpr1 csv) (mathCalc mathExpr2 csv)
 
 
 boolOperation :: Ord a => Operation -> a -> a -> Bool
@@ -173,17 +210,6 @@ mathOperation Div = div
 mathOperation Mod = mod
 
 
-mathCalc :: MathExpr -> Int
-mathCalc (Number n) = n
-mathCalc (Calc mathExpr1 op mathExpr2) = mathOperation op (mathCalc mathExpr1) (mathCalc mathExpr2)
- 
-
-getEntryValue:: [String] -> Col -> String
-getEntryValue entry (Index i) = entry !! mathCalc i
+getEntryValue:: Entry -> Col -> String
+getEntryValue entry (Index i) = entry !! mathCalc i entry
 getEntryValue _ (Filler f) = f
-
-
-change :: [String] -> Col -> Col -> [String]    
-change [] _ _ = []
-change vs (Index i) col2 = let num = mathCalc i in (take num vs) ++ [getEntryValue vs col2] ++ (drop (num + 1) vs)
-change vs (Filler f) col2 = map (\v -> if (v == f) then getEntryValue vs col2 else v) vs

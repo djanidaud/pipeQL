@@ -14,6 +14,7 @@ tokens :-
   "//".*        ;   
 
   csv           { \pos s -> TokenCSV pos } 
+  query         { \pos s -> TokenQuery pos }
   import        { \pos s -> TokenImport pos }
   
   print         { \pos s -> TokenPrint pos }
@@ -23,6 +24,10 @@ tokens :-
   reform        { \pos s -> TokenReform pos }
   update        { \pos s -> TokenUpdate pos }
   write         { \pos s -> TokenWrite pos }
+  note          { \pos s -> TokenNote pos }
+  unique        { \pos s -> TokenUnique pos}
+  error         { \pos s -> TokenError pos }
+  id            { \pos s -> TokenId pos }
   arity         { \pos s -> TokenArity pos }
   if            { \pos s -> TokenIf pos }
   "->"          { \pos s -> TokenThen pos }            
@@ -74,6 +79,7 @@ tokens :-
 -- Each action has type ::AlexPosn -> String -> Token 
 -- The token type: 
 data Token = TokenCSV AlexPosn
+           | TokenQuery AlexPosn
            | TokenImport AlexPosn
            | TokenPrint AlexPosn
            | TokenAsc AlexPosn  
@@ -82,6 +88,10 @@ data Token = TokenCSV AlexPosn
            | TokenReform AlexPosn 
            | TokenUpdate AlexPosn 
            | TokenWrite AlexPosn 
+           | TokenNote AlexPosn 
+           | TokenUnique AlexPosn 
+           | TokenError AlexPosn 
+           | TokenId AlexPosn 
            | TokenArity AlexPosn  
            | TokenIf AlexPosn 
            | TokenThen AlexPosn 
