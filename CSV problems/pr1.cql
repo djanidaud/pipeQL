@@ -2,6 +2,6 @@
 csv A = import "A.csv";
 csv B = import "B.csv";
 
-query orderedPrint = note "hey" | asc | print;
+query orderedPrint = C | asc | print;
 
-A ++ A | orderedPrint;
+//A ++ A | orderedPrint;

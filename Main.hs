@@ -1,5 +1,6 @@
 import Tokens ( alexScanTokens )
 import Grammar
+import PipeTypes
 import System.Environment 
 import Control.Exception
 import System.IO 
@@ -28,7 +29,8 @@ main' = do (fileName : _ ) <- getArgs
            sourceText <- readFile fileName
            
            let parsedProg = parseCalc (alexScanTokens sourceText)
-           evalProgLoop parsedProg Map.empty
+           let f = isTypeSafe parsedProg [] 
+           if (f == False) then error "Type Error" else evalProgLoop parsedProg Map.empty
            return ()
 
 
