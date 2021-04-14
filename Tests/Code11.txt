@@ -1,0 +1,5 @@
+//Test 2
+csv A = import "Test.csv";
+csv B = import "Test.csv";
+
+A | A -- B | write "Solution11.csv";
