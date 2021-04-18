@@ -113,9 +113,12 @@ CsvExpr : import fileName                   { Import $2 }
         | Query '++' Query                  { FullBinary (Union $1 $3) }
         | Query '--' Query                  { FullBinary (Diff $1 $3) }
 
-    
-Cols :  Col {[$1]}
-     | Col ',' Cols {$1 : $3}
+   
+Cols : ColItem {[$1]}
+     | ColItem ',' Cols {$1 : $3}
+
+ColItem : Col {Column $1}
+        | dollar MathExpr '.' '.' dollar MathExpr  {Range $2 $6}
 
 Col : dollar MathExpr    {Index $2}
     | word               {Filler $1}
@@ -258,9 +261,10 @@ data Binary a b = Cross a b  -- Cartessian (Cross) Product
                 | Inter a b  -- Intersection
                 deriving Show
 
+type Cols = [ColItem]
+data ColItem = Column Col | Range MathExpr MathExpr deriving Show
+data Col = Index MathExpr | Filler String deriving Show 
 
-data Col = Index MathExpr | Filler String deriving Show
-type Cols = [Col]
 
 
 data Conds = Single Cond | Neg Conds | And Conds Conds | Or Conds Conds deriving Show

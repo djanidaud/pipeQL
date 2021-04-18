@@ -1,13 +1,13 @@
 module PipeTypes (isTypeSafe) where 
 import Grammar
 
-data PipeType = TyCSV | TyInt | TyString | TyVoid deriving Eq
+data PipeType = TyCSV | TyCol | TyBool | TyInt | TyString | TyVoid deriving Eq
 type TypeEnvironment = [(String, PipeType)]
 
 
 getBinding :: String -> TypeEnvironment -> PipeType
 getBinding _ [] = error "Variable binding not found"
-getBinding x ((y,t):tenv) | x == y  = t
+getBinding x ((y,t):tenv) | x == y = t
                           | otherwise = getBinding x tenv
 
 
@@ -26,87 +26,87 @@ isTypeSafe ((Method name query): xs) tenv = t1 == TyCSV && isTypeSafe xs (addBin
                                    
 typeOfQuery:: Query -> TypeEnvironment -> PipeType
 typeOfQuery (PipeEnd csvExpr) tenv | t1 == TyCSV = t1
-                                   where t1 = typeOfCSVExpr csvExpr tenv
+                                     where t1 = typeOfCSVExpr csvExpr tenv
 
-       
+
 typeOfQuery (PipeLine pipe query) tenv | t1 == TyCSV && t2 == TyCSV = TyCSV
-                                     where t1 = typeOfQuery pipe tenv
-                                           t2 = typeOfQuery query tenv
-
-
-
+                                         where 
+                                         t1 = typeOfQuery pipe tenv
+                                         t2 = typeOfQuery query tenv
 
 typeOfCSVExpr:: CsvExpr -> TypeEnvironment -> PipeType
-typeOfCSVExpr (Reform cols) env = TyCSV
-                                  where colsType = map (\c -> typeOfCol c env) cols
+typeOfCSVExpr (Reform cols) env | True  = TyCSV
+                                  where 
+                                  --areColsWellTyped = all (\c -> typeOfCol c env == TyCol) cols
 
-typeOfCSVExpr (Update col1 col2) env = TyCSV
-                                       where (t1, t2) = (typeOfCol col1 env, typeOfCol col2 env)
+typeOfCSVExpr (Update col1 col2) env | t1 == t2 && t1 == TyCol = TyCSV
+                                       where 
+                                       (t1, t2) = (typeOfCol col1 env, typeOfCol col2 env)
 
-typeOfCSVExpr (Select conds) _ = TyCSV
-typeOfCSVExpr (If conds query) _ = TyCSV
-typeOfCSVExpr (FullBinary binary) _ = TyCSV
+typeOfCSVExpr (Select conds) env | t1 == TyBool = TyCSV
+                                   where
+                                   t1 = typeOfConds conds env
+                               
+typeOfCSVExpr (If conds query) env | t1 == TyBool = typeOfQuery query env
+                                     where
+                                     t1 = typeOfConds conds env
+
+typeOfCSVExpr (FullBinary binary) env = typeOfBinary binary env
 typeOfCSVExpr (VarName name) env | TyCSV == getBinding name env = TyCSV
 typeOfCSVExpr _ _ = TyCSV
 
 
+typeOfBinary :: Binary Query Query -> TypeEnvironment -> PipeType
+typeOfBinary (Cross a b) env | t1 == t2 && t1 == TyCSV = t1
+                               where
+                               (t1,t2) = (typeOfQuery a env,typeOfQuery b env )
+
+typeOfBinary (Union a b) env  | t1 == t2 && t1 == TyCSV = t1
+                               where
+                               (t1,t2) = (typeOfQuery a env,typeOfQuery b env )
+
+typeOfBinary (Diff a b) env  | t1 == t2 && t1 == TyCSV = t1
+                               where
+                               (t1,t2) = (typeOfQuery a env,typeOfQuery b env )
+
+typeOfBinary (Inter a b) env | t1 == t2 && t1 == TyCSV = t1
+                               where
+                               (t1,t2) = (typeOfQuery a env,typeOfQuery b env )
+
 typeOfCol:: Col -> TypeEnvironment -> PipeType
-typeOfCol (Index _) _ = TyInt
-typeOfCol (Filler _) _ = TyString
+typeOfCol (Index _) _ = TyCol
+typeOfCol (Filler _) _ = TyCol
+
+typeOfCond:: Cond -> TypeEnvironment -> PipeType 
+typeOfCond (Boolean _) _ = TyBool 
+typeOfCond (ColCond col1 _ col2) env | t1 == t2 && t1 == TyCol = TyBool 
+                                        where
+                                        (t1, t2) = (typeOfCol col1 env, typeOfCol col2 env)
+                                        
+typeOfCond (NumCond mathExpr1 _ mathExpr2) env | t1 == t2 && t1 == TyInt = TyBool 
+                                                 where
+                                                 (t1, t2) = (typeOfMath mathExpr1 env, typeOfMath mathExpr2 env)
+
+typeOfCond (IdCond _ mathExpr) env | t1 == TyInt = TyBool 
+                                     where
+                                     t1 = typeOfMath mathExpr env
 
 
--- -- Binary operations between two CSVs
--- data Binary a b = Cross a b  -- Cartessian (Cross) Product
---                 | Diff a b   -- Difference
---                 | Union a b  -- Union
---                 | Inter a b  -- Intersection
---                 deriving Show
--- data Col = Index MathExpr | Filler String deriving Show
--- type Cols = [Col]
--- data Conds = Single Cond | Neg Conds | And Conds Conds | Or Conds Conds deriving Show
--- data Cond = ColCond Col Operation Col  | NumCond MathExpr Operation MathExpr | IdCond Operation MathExpr | Boolean Bool  deriving Show
--- data Operation = Equal | NotEqual | Less | Greater | LessEqual | GreaterEqual deriving Show
-
--- data MathOperation = Add | Subs | Mul | Div | Mod deriving Show
--- data MathExpr = ContextArity | Arity Query | Number Int | Calc MathExpr MathOperation MathExpr deriving Show
+typeOfConds :: Conds -> TypeEnvironment -> PipeType 
+typeOfConds (Single cond) env = typeOfCond cond env
+typeOfConds (Neg conds) env = typeOfConds conds env
+typeOfConds (And conds1 conds2) env | t1 == t2 && t1 == TyBool = TyBool 
+                                      where
+                                      (t1, t2) = (typeOfConds conds1 env, typeOfConds conds2 env)
+                                 
+typeOfConds (Or conds1 conds2) env | t1 == t2 && t1 == TyBool = TyBool 
+                                     where
+                                     (t1, t2) = (typeOfConds conds1 env, typeOfConds conds2 env)
 
 
-
-
--- typeOf tenv (TmInt _ )  = TyInt
-
--- typeOf tenv (TmTrue ) = TyBool
-
--- typeOf tenv (TmFalse ) = TyBool
-
--- typeOf tenv (TmUnit ) = TyUnit
-
--- typeOf tenv (TmCompare e1 e2) = TyBool
---   where (TyInt,TyInt) = (typeOf tenv e1, typeOf tenv e2)
-
--- typeOf tenv (TmPair e1 e2) = TyPair t1 t2 
---   where (t1,t2) = (typeOf tenv e1, typeOf tenv e2) 
-
--- typeOf tenv (TmFst e1) = t1 
---   where (TyPair t1 t2) = typeOf tenv e1
-
--- typeOf tenv (TmSnd e2) = t2
---   where (TyPair t1 t2) = typeOf tenv e2
-
--- typeOf tenv (TmAdd e1 e2) = TyInt 
---   where (TyInt,TyInt) = (typeOf tenv e1, typeOf tenv e2)
-
--- typeOf tenv (TmVar x) = getBinding x tenv
-
--- typeOf tenv (TmIf e1 e2 e3) | t2 == t3 = t2
---   where (TyBool,t2,t3) = (typeOf tenv e1, typeOf tenv e2, typeOf tenv e3)
-
--- typeOf tenv (TmLambda x t e) = TyFun t u 
---   where u = typeOf (addBinding x t tenv) e
-
--- typeOf tenv (TmApp e1 e2) | t1 == t3 = t2
---   where ((TyFun t1 t2),t3) = (typeOf tenv e1, typeOf tenv e2)
-
--- typeOf tenv (TmLet x t e1 e2) | t == t1 = typeOf (addBinding x t tenv) e2
---   where t1 = typeOf tenv e1
-
+typeOfMath:: MathExpr -> TypeEnvironment -> PipeType 
+typeOfMath ContextArity _ = TyInt
+typeOfMath (Number _) _ = TyInt
+typeOfMath (Calc mathExpr1 _ mathExpr2) env | t1 == t2 && t1 == TyInt = t1
+                                              where
+                                              (t1, t2) = (typeOfMath mathExpr1 env, typeOfMath mathExpr2 env)

@@ -1,3 +1,4 @@
+module Main where
 import Tokens ( alexScanTokens )
 import Grammar
 import PipeTypes
@@ -8,6 +9,8 @@ import Data.List
 import Control.Monad
 import Data.Maybe
 import Data.List
+import System.Directory
+
 import qualified Data.Map as Map
 
 type Entry = [String];
@@ -72,10 +75,10 @@ evalQuery1 :: CsvExpr -> CSV -> Environment -> CSV
 evalQuery1 Asc csv _                = strictFilter sort csv
 evalQuery1 Desc csv _               = strictFilter (sortBy (flip compare)) csv
 evalQuery1 Unique csv _             = strictFilter (map head . group . sort) csv
-evalQuery1 (Import name) _  _       = strictFilter (fmap (splitOn ',').lines) (readFile name)
+evalQuery1 (Import name) _  _       = tryToImport name
 evalQuery1 (Select conds) csv _     = strictFilter (select conds) csv
 evalQuery1 (Update col1 col2) csv _ = strictFilter (map (\x -> update x col1 col2)) csv
-evalQuery1 (Reform cols) csv _      = strictFilter (reform cols) csv
+evalQuery1 (Reform cols) csv _      = strictFilter (\es -> reform (unwrapColItems cols $ es!!0) es) csv
 evalQuery1 Print csv _              = strictPipe   (putStrLn.toString) csv
 evalQuery1 (Write name) csv _       = strictPipe   (writeFile name.toString) csv
 evalQuery1 (Note message) csv _     = strictPipe   (\_ -> putStrLn message) csv
@@ -83,6 +86,16 @@ evalQuery1 (Error message) csv _    = strictPipe   (\_ -> error message) csv
 evalQuery1 (VarName name) csv env   = getBinding name env csv
 evalQuery1 (FullBinary b) _ env     = binaryEval b env
 evalQuery1 (If conds query) csv env = resolveIf conds (csv, env, query) 
+
+
+unwrapColItems:: Cols -> Entry -> [Col]
+unwrapColItems [] _ = []
+unwrapColItems ((Column c):cs) entry = c : unwrapColItems cs entry
+unwrapColItems (Range m1 m2:cs) entry | start <= end = (map (\s -> Index $ Number s) [start .. end]) ++ unwrapColItems cs entry
+                                        | otherwise =  reverse $ (map (\s -> Index $ Number s) [end .. start]) ++ unwrapColItems cs entry
+                                          where
+                                          start = mathCalc m1 entry
+                                          end = mathCalc m2 entry
 
 
 isValue :: Variable -> Bool
@@ -111,6 +124,7 @@ resolveIf conds (csv, env, query) = do xs <- csv
                                                     ) indexed
                                        sequence mapped
 
+
 reform :: [Col] -> [Entry] -> [Entry]
 reform cols = map (\entry -> map (getEntryValue entry) cols)
 
@@ -127,6 +141,13 @@ update vs (Index i) col2 = beginning ++ [getEntryValue vs col2] ++ end
                            num = mathCalc i vs :: Int 
                            beginning = take num vs
                            end = drop (num + 1) vs
+
+
+tryToImport:: String -> CSV
+tryToImport name = do b <- doesFileExist name 
+                      if(b) then strictFilter (fmap (splitOn ',').lines) $ readFile name
+                      else error $ "Error: File " ++ name ++ " does not exist!"
+                  
          
 
 -- A strict pipe is a pipe which doesn't modify the input CSV, it only performs some side-effects.
@@ -192,6 +213,7 @@ condition (NumCond a op b) (entry, _) = boolOperation op (mathCalc a entry) (mat
 mathCalc :: MathExpr -> Entry -> Int
 mathCalc ContextArity csv = length csv
 mathCalc (Number n) _ = n
+mathCalc (Calc _ Div (Number 0)) _ = error "Error: Division by 0"
 mathCalc (Calc mathExpr1 op mathExpr2) csv = mathOperation op (mathCalc mathExpr1 csv) (mathCalc mathExpr2 csv)
 
 
@@ -213,5 +235,11 @@ mathOperation Mod = mod
 
 
 getEntryValue:: Entry -> Col -> String
-getEntryValue entry (Index i) = entry !! mathCalc i entry
 getEntryValue _ (Filler f) = f
+getEntryValue entry (Index expr) | 0 <= i && i < length entry = entry !! i
+                                 | otherwise = error $ "Error: Cannot access index " ++ show i ++ " in " ++ show entry
+                                   where
+                                   i = mathCalc expr entry
+                            
+
+
