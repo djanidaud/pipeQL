@@ -1,3 +1,0 @@
-//Test 2
-csv A = import "Test.csv";
-A | asc | write "Solution2.csv";
