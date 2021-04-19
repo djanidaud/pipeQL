@@ -1,3 +1,0 @@
-//Test 2
-csv A = import "Test.csv";
-A | select ($1 != "Andrewson") | write "Solution5.csv";

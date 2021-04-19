@@ -4,4 +4,4 @@ csv B = import "B.csv";
 
 query orderedPrint = asc | print;
 
-A x B | reform [$4..$1] | orderedPrint; 
+A | orderedPrint | write "gugu.csv"; 

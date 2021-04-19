@@ -9,6 +9,11 @@ $digit = 0-9
 $alpha = [a-zA-Z]
 $fileName = [A-Z]
 
+
+$special = [\.\;\,\$\|\*\+\?\#\~\-\{\}\(\)\[\]\^\/]
+$graphic = $printable # $white
+
+
 tokens :-
   $white+       ;
   "//".*        ;   
@@ -71,7 +76,7 @@ tokens :-
   \>            { \pos s -> TokenGreater pos }
   
   \"[$alpha $digit \_ \’]*\"             { \pos s -> TokenString pos (init.tail $ s) }
-  \"$alpha [$alpha $digit \_ \’]*.csv\"  { \pos s -> TokenFileName pos (init.tail $ s) }
+  \"($graphic # \")*\"                   { \pos s -> TokenFileName pos (init.tail $ s) }
   $alpha [$alpha $digit \_ \’]*          { \pos s -> TokenVar pos s }
   
 

@@ -1,4 +1,4 @@
-module Main where
+module Eval where
 import Tokens ( alexScanTokens )
 import Grammar
 import PipeTypes
@@ -7,21 +7,21 @@ import Control.Exception
 import System.IO 
 import Data.List 
 import Control.Monad
-import Data.Maybe
+import Data.Maybe ( isNothing, fromJust )
 import Data.List
 import System.Directory
 
 import qualified Data.Map as Map
 
-type Entry = [String];
-type CSV = IO [Entry];
+type Entry = [String]
+type CSV = IO [Entry]
 data Variable = Value CSV | Procedure Query Environment
 type Environment = Map.Map String Variable
 type State = (CSV, Environment, Query)  
 
 
-main :: IO ()
-main = catch main' noParse
+gugu :: IO ()
+gugu = catch main' noParse
        where
        noParse :: ErrorCall -> IO ()
        noParse = hPutStr stderr.show
@@ -92,10 +92,10 @@ unwrapColItems:: Cols -> Entry -> [Col]
 unwrapColItems [] _ = []
 unwrapColItems ((Column c):cs) entry = c : unwrapColItems cs entry
 unwrapColItems (Range m1 m2:cs) entry | start <= end = (map (\s -> Index $ Number s) [start .. end]) ++ unwrapColItems cs entry
-                                        | otherwise =  reverse $ (map (\s -> Index $ Number s) [end .. start]) ++ unwrapColItems cs entry
-                                          where
-                                          start = mathCalc m1 entry
-                                          end = mathCalc m2 entry
+                                      | otherwise = reverse $ (map (\s -> Index $ Number s) [end .. start]) ++ unwrapColItems cs entry
+                                        where
+                                        start = mathCalc m1 entry
+                                        end = mathCalc m2 entry
 
 
 isValue :: Variable -> Bool
@@ -145,7 +145,7 @@ update vs (Index i) col2 = beginning ++ [getEntryValue vs col2] ++ end
 
 tryToImport:: String -> CSV
 tryToImport name = do b <- doesFileExist name 
-                      if(b) then strictFilter (fmap (splitOn ',').lines) $ readFile name
+                      if (b) then strictFilter (fmap (fmap trim . splitOn ',').lines) $ readFile name
                       else error $ "Error: File " ++ name ++ " does not exist!"
                   
          
@@ -240,3 +240,18 @@ getEntryValue entry (Index expr) | 0 <= i && i < length entry = entry !! i
                                  | otherwise = error $ "Error: Cannot access index " ++ show i ++ " in " ++ show entry
                                    where
                                    i = mathCalc expr entry
+
+
+isSpace :: Char -> Bool
+isSpace ' ' = True 
+isSpace '\r' = True 
+isSpace _ = False
+
+trim :: String -> String
+trim xs = dropSpaceTail "" $ dropWhile isSpace xs
+
+dropSpaceTail :: String -> String -> String
+dropSpaceTail maybeStuff "" = ""
+dropSpaceTail maybeStuff (x:xs) | isSpace x = dropSpaceTail (x:maybeStuff) xs
+                                | null maybeStuff = x : dropSpaceTail "" xs
+                                | otherwise       = reverse maybeStuff ++ x : dropSpaceTail "" xs

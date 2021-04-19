@@ -261,15 +261,16 @@ data Binary a b = Cross a b  -- Cartessian (Cross) Product
                 | Inter a b  -- Intersection
                 deriving Show
 
+
 type Cols = [ColItem]
 data ColItem = Column Col | Range MathExpr MathExpr deriving Show
 data Col = Index MathExpr | Filler String deriving Show 
 
 
-
 data Conds = Single Cond | Neg Conds | And Conds Conds | Or Conds Conds deriving Show
 data Cond = ColCond Col Operation Col  | NumCond MathExpr Operation MathExpr | IdCond Operation MathExpr | Boolean Bool  deriving Show
 data Operation = Equal | NotEqual | Less | Greater | LessEqual | GreaterEqual deriving Show
+
 
 data MathOperation = Add | Subs | Mul | Div | Mod deriving Show
 data MathExpr = ContextArity | Arity Query | Number Int | Calc MathExpr MathOperation MathExpr deriving Show

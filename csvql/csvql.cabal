@@ -4,25 +4,53 @@ cabal-version:       2.4
 
 name:                csvql
 version:             0.1.0.0
--- synopsis:
--- description:
--- bug-reports:
-license:             NONE
-license-file:        LICENSE
 author:              Dzhani Daud
--- copyright:
--- category:
+
+library
+  exposed-modules: 
+      Lib
+      Eval
+      Grammar
+      Tokens
+      PipeTypes
+  other-modules:
+      Paths_csvql
+  hs-source-dirs:
+      src
+  build-depends:
+      base ^>=4.13.0.0,
+      array,
+      containers,
+      directory
+  default-language: Haskell2010
 
 executable csvql
-  main-is:             Main.hs
-  other-modules:       Tokens,
-                       Grammar,
-                       PipeTypes
-  -- other-extensions:
-  build-depends:       base ^>=4.13.0.0,
-                       array,
-                       containers,
-                       directory
+  main-is: Main.hs
+  other-modules:
+      Paths_csvql
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , csvql
+  default-language: Haskell2010
 
-  -- hs-source-dirs:
-  default-language:    Haskell2010
+test-suite testsuite
+  type:          detailed-0.9
+  test-module:   ForTests    
+  build-depends: base ^>=4.13.0.0,
+                 array,
+                 containers,
+                 directory,
+                 Cabal >= 1.9.2
+  other-modules:
+      Paths_csvql
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , csvql
+
+  default-language: Haskell2010
