@@ -18,7 +18,7 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base ^>=4.13.0.0,
+      base ,
       array,
       containers,
       directory
@@ -39,7 +39,7 @@ executable csvql
 test-suite testsuite
   type:          detailed-0.9
   test-module:   ForTests    
-  build-depends: base ^>=4.13.0.0,
+  build-depends: base ,
                  array,
                  containers,
                  directory,

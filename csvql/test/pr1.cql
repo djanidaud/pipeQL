@@ -1,7 +1,5 @@
 // Problem I:
-csv A = import "A.csv";
-csv B = import "B.csv";
+csv A = import "Test1_2A.csv";
+csv B = import "Test1_2B.csv";
 
-query orderedPrint = C | asc | print;
-
-//A ++ A | orderedPrint;
+A | A x B | asc | write
