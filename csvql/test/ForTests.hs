@@ -36,8 +36,13 @@ answer9 = [["Beans", "Beanson"],["Andrew", "Andrewson"],["Charles", "Charleson"]
 answer10 = [["Beans","Beanson","Beans","Beanson"],["Beans","Beanson","Andrew","Andrewson"],["Beans","Beanson","Charles","Charleson"],["Beans","Beanson","Andrew","Andrewson"],["Andrew","Andrewson","Beans","Beanson"],["Andrew","Andrewson","Andrew","Andrewson"],["Andrew","Andrewson","Charles","Charleson"],["Andrew","Andrewson","Andrew","Andrewson"],["Charles","Charleson","Beans","Beanson"],["Charles","Charleson","Andrew","Andrewson"],["Charles","Charleson","Charles","Charleson"],["Charles","Charleson","Andrew","Andrewson"],["Andrew","Andrewson","Beans","Beanson"],["Andrew","Andrewson","Andrew","Andrewson"],["Andrew","Andrewson","Charles","Charleson"],["Andrew","Andrewson","Andrew","Andrewson"]]
 answer11 = []
 answer12 = [[ "Beanson","Beans"], ["Andrewson","Andrew"],[ "Charleson","Charles"], ["Andrewson","Andrew"]]
-answerpr1 = [["1","2","3","4"],["1","2","3","4"],["1","2","3","4"],["1","2","3","4"]] 
-answerpr2 = [["2","2"],["6","2"]]
+answerpr1_1 = [["Jian","Shi", "Julian","Rathke"]]
+answerpr1_2 = [["1","2","3","4"],["1","2","3","4"],["1","2","3","4"],["1","2","3","4"]] 
+answerpr1_3 = []
+answerpr2_1 = [["Carter","Gillian"],["Timms","Dudley"]]
+answerpr2_2 = [["2","2"],["6","2"]]
+answerpr2_3 = [["","1"],["1","5"],["2","1"],["5",""]]
+answerpr3_1 = []
 
 
 
@@ -62,9 +67,13 @@ tests = do res1 <- evaluateTest "./test/Code1.cql" "./test/output1.csv" answer1 
            res10 <- evaluateTest "./test/Code10.cql" "./test/output10.csv" answer10 "Cross product Failed"
            res11 <- evaluateTest "./test/Code11.cql" "./test/output11.csv" answer11 "Subtraction Failed"
            res12 <- evaluateTest "./test/Code12.cql" "./test/output12.csv" answer12 "Arity Failed"
-           --res13 <- evaluateTest "./test/pr1.cql" "./test/output13.csv" answerpr1 "Problem 1 of Coursework Failed"
-           --res14 <- evaluateTest "./test/pr2.cql" "./test/outputpr2.csv" answerpr2 "Problem 2 of Coursework Failed"
-
+           res13 <- evaluateTest "./test/pr1_1.cql" "./test/output13.csv" answerpr1_1 "Problem 1 Example 1 of Coursework Failed"
+           res14 <- evaluateTest "./test/pr1_2.cql" "./test/output14.csv" answerpr1_2 "Problem 1 Example 2 of Coursework Failed"
+           res15 <- evaluateTest "./test/pr1_3.cql" "./test/output15.csv" answerpr1_3 "Problem 1 Example 3 of Coursework Failed"
+           res16 <- evaluateTest "./test/pr2_1.cql" "./test/output16.csv" answerpr2_1 "Problem 2 Example 1 of Coursework Failed"
+           res17 <- evaluateTest "./test/pr2_2.cql" "./test/output17.csv" answerpr2_2 "Problem 1 Example 3 of Coursework Failed"
+           res18 <- evaluateTest "./test/pr2_3.cql" "./test/output18.csv" answerpr2_3 "Problem 1 Example 3 of Coursework Failed"
+           res19 <- evaluateTest "./test/pr3_1.cql" "./test/output19.csv" answerpr3_1 "Problem 3 Example 1 of Coursework Failed"
            return [ 
                     createTest "Import/Export Test" res1,
                     createTest "Ascend Test" res2, 
@@ -77,9 +86,14 @@ tests = do res1 <- evaluateTest "./test/Code1.cql" "./test/output1.csv" answer1 
                     createTest "Union Test" res9,
                     createTest "Cross Product Test" res10,
                     createTest "Subtraction Test" res11,
-                    createTest "Arity Test" res12
-                    --createTest "Problem 1 Test" res13
-                    --createTest "Problem 2 Test" res14
+                    createTest "Arity Test" res12,
+                    createTest "Problem 1 Example 1 Test" res13,
+                    createTest "Problem 1 Example 2 Test" res14,
+                    createTest "Problem 1 Example 3 Test" res15,
+                    createTest "Problem 2 Example 1 Test" res16,
+                    createTest "Problem 2 Example 2 Test" res17,
+                    createTest "Problem 2 Example 3 Test" res18,
+                    createTest "Problem 1 Example 3 Test" res19
 
                   ]
                                       
