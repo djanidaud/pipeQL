@@ -43,6 +43,9 @@ answerpr2_1 = [["Carter","Gillian"],["Timms","Dudley"]]
 answerpr2_2 = [["2","2"],["6","2"]]
 answerpr2_3 = [["","1"],["1","5"],["2","1"],["5",""]]
 answerpr3_1 = []
+answerpr3_2 = []
+answerpr3_3 = []
+answerpr4_1 = []
 
 
 
@@ -74,6 +77,14 @@ tests = do res1 <- evaluateTest "./test/Code1.cql" "./test/output1.csv" answer1 
            res17 <- evaluateTest "./test/pr2_2.cql" "./test/output17.csv" answerpr2_2 "Problem 1 Example 3 of Coursework Failed"
            res18 <- evaluateTest "./test/pr2_3.cql" "./test/output18.csv" answerpr2_3 "Problem 1 Example 3 of Coursework Failed"
            res19 <- evaluateTest "./test/pr3_1.cql" "./test/output19.csv" answerpr3_1 "Problem 3 Example 1 of Coursework Failed"
+           res20 <- evaluateTest "./test/pr3_2.cql" "./test/output20.csv" answerpr3_2 "Problem 3 Example 2 of Coursework Failed"
+           res21 <- evaluateTest "./test/pr3_3.cql" "./test/output21.csv" answerpr3_3 "Problem 3 Example 3 of Coursework Failed"
+           res22 <- evaluateTest "./test/pr4_1.cql" "./test/output22.csv" answerpr4_1 "Problem 4 Example 1 of Coursework Failed"
+           res23 <- evaluateTest "./test/pr4_2.cql" "./test/output23.csv" answerpr4_1 "Problem 4 Example 2 of Coursework Failed"
+           res24 <- evaluateTest "./test/pr5.cql" "./test/output24.csv" answerpr4_1 "Problem 5 of Coursework Failed"
+
+
+
            return [ 
                     createTest "Import/Export Test" res1,
                     createTest "Ascend Test" res2, 
@@ -93,7 +104,12 @@ tests = do res1 <- evaluateTest "./test/Code1.cql" "./test/output1.csv" answer1 
                     createTest "Problem 2 Example 1 Test" res16,
                     createTest "Problem 2 Example 2 Test" res17,
                     createTest "Problem 2 Example 3 Test" res18,
-                    createTest "Problem 1 Example 3 Test" res19
+                    createTest "Problem 1 Example 3 Test" res19,
+                    createTest "Problem 1 Example 3 Test" res20,
+                    createTest "Problem 1 Example 3 Test" res21,
+                    createTest "Problem 1 Example 3 Test" res22,
+                    createTest "Problem 4 Example 3 Test" res23,
+                    createTest "Problem 5 Test" res24
 
                   ]
                                       

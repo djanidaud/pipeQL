@@ -1,4 +1,4 @@
-// Problem V:
-csv A = import "A.csv";
-A | reform ($1, "0", $1) | asc | print;
+// Problem III:
+csv A = import "./test/Test5A.csv";
 
+A | write "./test/output24.csv";
