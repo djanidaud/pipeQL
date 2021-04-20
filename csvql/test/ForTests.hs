@@ -42,12 +42,12 @@ answerpr1_3 = []
 answerpr2_1 = [["Carter","Gillian"],["Timms","Dudley"]]
 answerpr2_2 = [["2","2"],["6","2"]]
 answerpr2_3 = [["","1"],["1","5"],["2","1"],["5",""]]
-answerpr3_1 = []
-answerpr3_2 = []
+answerpr3_1 = [["1","5","4","7"],["2","","2","1"],["2","8","2","3"],["4","8","2","3"]]
+answerpr3_2 = [["Alice","L","AAW","LC"],["Bob","C","CC","CD"]]
 answerpr3_3 = []
-answerpr4_1 = []
-
-
+answerpr4_1 = [["Leonard","Hunt"],["Michael","Baker"],["Oscar","Walker"]]
+answerpr4_2 = [["Cristiano","Ronaldo"],["David","Beckham"],["Diego","Madradona"]]
+answerpr5 = [["Dudley","0","Dudley"],["Gillian","0","Gillian"],["Steven","0","Steven"]]
 
 
 
@@ -80,8 +80,8 @@ tests = do res1 <- evaluateTest "./test/Code1.cql" "./test/output1.csv" answer1 
            res20 <- evaluateTest "./test/pr3_2.cql" "./test/output20.csv" answerpr3_2 "Problem 3 Example 2 of Coursework Failed"
            res21 <- evaluateTest "./test/pr3_3.cql" "./test/output21.csv" answerpr3_3 "Problem 3 Example 3 of Coursework Failed"
            res22 <- evaluateTest "./test/pr4_1.cql" "./test/output22.csv" answerpr4_1 "Problem 4 Example 1 of Coursework Failed"
-           res23 <- evaluateTest "./test/pr4_2.cql" "./test/output23.csv" answerpr4_1 "Problem 4 Example 2 of Coursework Failed"
-           res24 <- evaluateTest "./test/pr5.cql" "./test/output24.csv" answerpr4_1 "Problem 5 of Coursework Failed"
+           res23 <- evaluateTest "./test/pr4_2.cql" "./test/output23.csv" answerpr4_2 "Problem 4 Example 2 of Coursework Failed"
+           res24 <- evaluateTest "./test/pr5.cql" "./test/output24.csv" answerpr5 "Problem 5 of Coursework Failed"
 
 
 
