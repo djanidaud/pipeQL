@@ -46,7 +46,7 @@ answerpr3_1 = [["1","5","4","7"],["2","","2","1"],["2","8","2","3"],["4","8","2"
 answerpr3_2 = [["Alice","L","AAW","LC"],["Bob","C","CC","CD"]]
 answerpr3_3 = []
 answerpr4_1 = [["Leonard","Hunt"],["Michael","Baker"],["Oscar","Walker"]]
-answerpr4_2 = [["Cristiano","Ronaldo"],["David","Beckham"],["Diego","Madradona"]]
+answerpr4_2 = [["Cristiano","Ronaldo"],["David","Beckham"],["Diego","Maradona"]]
 answerpr5 = [["Dudley","0","Dudley"],["Gillian","0","Gillian"],["Steven","0","Steven"]]
 
 
@@ -99,11 +99,11 @@ tests = do res1 <- evaluateTest "./test/Code1.cql" "./test/output1.csv" answer1 
                     createTest "Problem 2 Example 1 Test" res16,
                     createTest "Problem 2 Example 2 Test" res17,
                     createTest "Problem 2 Example 3 Test" res18,
-                    createTest "Problem 1 Example 3 Test" res19,
-                    createTest "Problem 1 Example 3 Test" res20,
-                    createTest "Problem 1 Example 3 Test" res21,
-                    createTest "Problem 1 Example 3 Test" res22,
-                    createTest "Problem 4 Example 3 Test" res23,
+                    createTest "Problem 3 Example 1 Test" res19,
+                    createTest "Problem 3 Example 2 Test" res20,
+                    createTest "Problem 3 Example 3 Test" res21,
+                    createTest "Problem 4 Example 1 Test" res22,
+                    createTest "Problem 4 Example 2 Test" res23,
                     createTest "Problem 5 Test" res24
 
                   ]

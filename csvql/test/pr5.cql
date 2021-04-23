@@ -1,4 +1,4 @@
-// Problem III:
+// Problem V:
 csv A = import "./test/Test5A.csv";
 
-A | write "./test/output24.csv";
+A | reform [$0, "0", $0] | asc | write "./test/output24.csv";

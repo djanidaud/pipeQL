@@ -1,4 +1,4 @@
 // Problem II:
 csv A = import "./test/Test2_1A.csv";
 
-A | select ($1 == $2) | reform [$3, $2] | asc | write "./test/output16.csv";
+A | select ($0 == $1) | reform [$2, $1] | asc | write "./test/output16.csv";
