@@ -1,4 +1,4 @@
-// Problem III:
+// Problem IV:
 csv A = import "./test/Test4_1A.csv";
 
-A | write "./test/output22.csv";
+A | select ($1 != "") | asc | write "./test/output22.csv";

@@ -52,11 +52,6 @@ answerpr5 = [["Dudley","0","Dudley"],["Gillian","0","Gillian"],["Steven","0","St
 
 
 
---answerpr3 =
---answerpr4 =
---answerpr5 =
-
-
 tests :: IO [Test]
 tests = do res1 <- evaluateTest "./test/Code1.cql" "./test/output1.csv" answer1 "Import/Export Failed"      
            res2 <- evaluateTest "./test/Code2.cql" "./test/output2.csv" answer2 "Ascend Failed"    
