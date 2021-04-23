@@ -3,4 +3,4 @@ A query language for working with CSV files build around the Pipes and Filters d
 
 Enter the project's directory: `cd csvql`
 Compile with: `cabal build`
-Run with: `./path-to-ext/csvql someCode.cql`
+Run with: `./path-to-exe/csvql someCode.cql`
