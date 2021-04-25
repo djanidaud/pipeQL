@@ -4,4 +4,4 @@ csv B = import "B.csv";
 
 query orderedPrint = asc | print;
 
-A | orderedPrint | write "gugu.csv"; 
+A | orderedPrint | write "gugu.csv";
