@@ -1,7 +1,5 @@
-module Lib
-    ( someFunc
-    ) where
+module Lib ( mainFunction ) where
+import Eval ( main )
 
-import Eval ( gugu )
-someFunc :: IO ()
-someFunc = gugu
+mainFunction :: IO ()
+mainFunction = main

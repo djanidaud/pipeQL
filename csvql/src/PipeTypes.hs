@@ -27,17 +27,18 @@ isTypeSafe ((Method name query): xs) tenv = t1 == TyCSV && isTypeSafe xs (addBin
 typeOfQuery:: Query -> TypeEnvironment -> PipeType
 typeOfQuery (PipeEnd csvExpr) tenv | t1 == TyCSV = t1
                                      where t1 = typeOfCSVExpr csvExpr tenv
-
-
 typeOfQuery (PipeLine pipe query) tenv | t1 == TyCSV && t2 == TyCSV = TyCSV
                                          where 
                                          t1 = typeOfQuery pipe tenv
                                          t2 = typeOfQuery query tenv
 
 typeOfCSVExpr:: CsvExpr -> TypeEnvironment -> PipeType
-typeOfCSVExpr (Reform cols) env | True  = TyCSV
+typeOfCSVExpr (Reform cols) env | areColsWellTyped  = TyCSV
                                   where 
-                                  --areColsWellTyped = all (\c -> typeOfCol c env == TyCol) cols
+                                  areColsWellTyped = all (\c -> case c of 
+                                                                    Column g -> typeOfCol g env == TyCol
+                                                                    Range math1 math2 -> typeOfMath math1 env == TyInt && typeOfMath math2 env == TyInt
+                                                         ) cols
 
 typeOfCSVExpr (Update col1 col2) env | t1 == t2 && t1 == TyCol = TyCSV
                                        where 
@@ -69,10 +70,6 @@ typeOfBinary (Diff a b) env  | t1 == t2 && t1 == TyCSV = t1
                                where
                                (t1,t2) = (typeOfQuery a env,typeOfQuery b env )
 
-typeOfBinary (Inter a b) env | t1 == t2 && t1 == TyCSV = t1
-                               where
-                               (t1,t2) = (typeOfQuery a env,typeOfQuery b env )
-
 typeOfCol:: Col -> TypeEnvironment -> PipeType
 typeOfCol (Index _) _ = TyCol
 typeOfCol (Filler _) _ = TyCol
@@ -86,10 +83,6 @@ typeOfCond (ColCond col1 _ col2) env | t1 == t2 && t1 == TyCol = TyBool
 typeOfCond (NumCond mathExpr1 _ mathExpr2) env | t1 == t2 && t1 == TyInt = TyBool 
                                                  where
                                                  (t1, t2) = (typeOfMath mathExpr1 env, typeOfMath mathExpr2 env)
-
-typeOfCond (IdCond _ mathExpr) env | t1 == TyInt = TyBool 
-                                     where
-                                     t1 = typeOfMath mathExpr env
 
 
 typeOfConds :: Conds -> TypeEnvironment -> PipeType 
@@ -105,6 +98,7 @@ typeOfConds (Or conds1 conds2) env | t1 == t2 && t1 == TyBool = TyBool
 
 
 typeOfMath:: MathExpr -> TypeEnvironment -> PipeType 
+typeOfMath Id _ = TyInt
 typeOfMath ContextArity _ = TyInt
 typeOfMath (Number _) _ = TyInt
 typeOfMath (Calc mathExpr1 _ mathExpr2) env | t1 == t2 && t1 == TyInt = t1

@@ -131,13 +131,11 @@ Conds : Cond             { Single $1 }
 
 Cond : Col Operation Col           { ColCond $1 $2 $3 }
      | MathExpr Operation MathExpr { NumCond $1 $2 $3 }
-     | id Operation MathExpr       { IdCond  $2 $3 }
-     | MathExpr Operation id       { IdCond  (mirrorOperation $2) $1 }
      | true   {Boolean True}
      | false  {Boolean False}
     
-MathExpr : arity Query           {Arity $2}
-         | arity                 {ContextArity}
+MathExpr : arity                 {ContextArity}
+         | id                    {Id}
          | int                   {Number $1}
          | MathExpr '+' MathExpr {Calc $1 Add $3}
          | MathExpr '-' MathExpr {Calc $1 Subs $3}
@@ -258,7 +256,6 @@ data CsvExpr = Import String
 data Binary a b = Cross a b  -- Cartessian (Cross) Product
                 | Diff a b   -- Difference
                 | Union a b  -- Union
-                | Inter a b  -- Intersection
                 deriving Show
 
 
@@ -268,10 +265,10 @@ data Col = Index MathExpr | Filler String deriving Show
 
 
 data Conds = Single Cond | Neg Conds | And Conds Conds | Or Conds Conds deriving Show
-data Cond = ColCond Col Operation Col  | NumCond MathExpr Operation MathExpr | IdCond Operation MathExpr | Boolean Bool  deriving Show
+data Cond = ColCond Col Operation Col  | NumCond MathExpr Operation MathExpr | Boolean Bool  deriving Show
 data Operation = Equal | NotEqual | Less | Greater | LessEqual | GreaterEqual deriving Show
 
 
 data MathOperation = Add | Subs | Mul | Div | Mod deriving Show
-data MathExpr = ContextArity | Arity Query | Number Int | Calc MathExpr MathOperation MathExpr deriving Show
+data MathExpr = ContextArity | Id | Number Int | Calc MathExpr MathOperation MathExpr deriving Show
 } 
