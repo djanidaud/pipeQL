@@ -1,4 +1,2 @@
-Alice,L,,LC,Bob,C,,
-Alice,L,,LC,Alice,,AAW,
-Bob,,CC,CD,Bob,C,,
-Bob,,CC,CD,Alice,,AAW,
+Alice,L,AAW,LC
+Bob,C,CC,CD

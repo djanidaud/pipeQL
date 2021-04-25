@@ -21,6 +21,7 @@ outputPath, codePath :: FilePath
 outputPath = "./test/output/"
 codePath = "./test/code/"
 
+
 tests :: IO [Test]
 tests = do res1 <- evaluateTest "Code1.cql" "output1.csv" answer1 "Import/Export Failed"      
            res2 <- evaluateTest "Code2.cql" "output2.csv" answer2 "Ascend Failed"    
@@ -73,14 +74,11 @@ tests = do res1 <- evaluateTest "Code1.cql" "output1.csv" answer1 "Import/Export
                     createTest "Problem 2 Example 1 Test" res16,
                     createTest "Problem 2 Example 2 Test" res17,
                     createTest "Problem 2 Example 3 Test" res18,
-
                     createTest "Problem 3 Example 1 Test" res19,
                     createTest "Problem 3 Example 2 Test" res20,
                     createTest "Problem 3 Example 3 Test" res21,
-
                     createTest "Problem 4 Example 1 Test" res22,
                     createTest "Problem 4 Example 2 Test" res23,
-
                     createTest "Problem 5 Test" res24
                   ]
                                       
@@ -115,16 +113,16 @@ answer9 = [["Beans", "Beanson"],["Andrew", "Andrewson"],["Charles", "Charleson"]
 answer10 = [["Beans","Beanson","Beans","Beanson"],["Beans","Beanson","Andrew","Andrewson"],["Beans","Beanson","Charles","Charleson"],["Beans","Beanson","Andrew","Andrewson"],["Andrew","Andrewson","Beans","Beanson"],["Andrew","Andrewson","Andrew","Andrewson"],["Andrew","Andrewson","Charles","Charleson"],["Andrew","Andrewson","Andrew","Andrewson"],["Charles","Charleson","Beans","Beanson"],["Charles","Charleson","Andrew","Andrewson"],["Charles","Charleson","Charles","Charleson"],["Charles","Charleson","Andrew","Andrewson"],["Andrew","Andrewson","Beans","Beanson"],["Andrew","Andrewson","Andrew","Andrewson"],["Andrew","Andrewson","Charles","Charleson"],["Andrew","Andrewson","Andrew","Andrewson"]]
 answer11 = []
 answer12 = [[ "Beanson","Beans"], ["Andrewson","Andrew"],[ "Charleson","Charles"], ["Andrewson","Andrew"]]
-answerpr1_1 = [["Jian","Shi", "Julian","Rathke"]]
+answerpr1_1 = []
 answerpr1_2 = [["1","2","3","4"],["1","2","3","4"],["1","2","3","4"],["1","2","3","4"]] 
 answerpr1_3 = []
 answerpr2_1 = [["Carter","Gillian"],["Timms","Dudley"]]
-answerpr2_2 = [["1","3","6"], ["1","2","2"], ["2","2","2"], ["2","2","6"]]
-answerpr2_3 = [["1","1", ""],["1","1","2"],["5","3", "2"],["5","5","1"], ["", "","5"]]
-answerpr3_1 = [["1","5","4","","1","6","4","7"],["1","5","4","","2","8","5","3"],["1","5","4","","2","","","1"],["1","5","4","","4","","2","3"],["2","","2","","1","6","4","7"],["2","","2","","2","8","5","3"],["2","","2","","2","","","1"],["2","","2","","4","","2","3"],["3","7","1","2","1","6","4","7"],["3","7","1","2","2","8","5","3"],["3","7","1","2","2","","","1"],["3","7","1","2","4","","2","3"],["4","8","","","1","6","4","7"],["4","8","","","2","8","5","3"],["4","8","","","2","","","1"],["4","8","","","4","","2","3"]]
-answerpr3_2 = [["Alice","L","","LC","Bob","C","",""], ["Alice","L","","LC","Alice","","AAW",""], ["Bob","","CC","CD","Bob","C","",""], ["Bob","","CC","CD","Alice","","AAW",""]]
-answerpr3_3 = [["1","6","2","3","3","8","6","6"],["1","6","2","3","4","9","5","3"],["2","7","4","5","3","8","6","6"],["2","7","4","5","4","9","5","3"]]
-answerpr4_1 = [["Michael","Baker"],["Leonard","Hunt"],["Oscar","Walker"]]
-
-answerpr4_2 = [["Cristiano","Ronaldo"],["David","Beckham"],["Diego","Madradona"]]
+answerpr2_2 = [["2","2"],["6","2"]]
+answerpr2_3 = [["","1"],["1","5"],["2","1"],["5",""]]
+answerpr3_1 = [["1","5","4","7"],["2","","2","1"],["2","8","2","3"],["4","8","2","3"]]
+answerpr3_2 = [["Alice","L","AAW","LC"],["Bob","C","CC","CD"]]
+answerpr3_3 = []
+answerpr4_1 = [["Leonard","Hunt"],["Michael","Baker"],["Oscar","Walker"]]
+answerpr4_2 = [["Cristiano","Ronaldo"],["David","Beckham"],["Diego","Maradona"]]
 answerpr5 = [["Dudley","0","Dudley"],["Gillian","0","Gillian"],["Steven","0","Steven"]]
+
