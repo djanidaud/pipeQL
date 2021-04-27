@@ -15,6 +15,7 @@ $graphic = $printable # $white
 
 
 tokens :-
+  \"[$alpha $digit $white \_ \’]*\"             { \pos s -> TokenString pos (init.tail $ s) }
   $white+       ;
   "//".*        ;   
 
@@ -75,7 +76,6 @@ tokens :-
   \<            { \pos s -> TokenLess pos }
   \>            { \pos s -> TokenGreater pos }
   
-  \"[$alpha $digit \_ \’]*\"             { \pos s -> TokenString pos (init.tail $ s) }
   \"($graphic # \")*\"                   { \pos s -> TokenFileName pos (init.tail $ s) }
   $alpha [$alpha $digit \_ \’]*          { \pos s -> TokenVar pos s }
   

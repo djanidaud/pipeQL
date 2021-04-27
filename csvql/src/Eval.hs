@@ -17,8 +17,7 @@ type Entry = [String]
 type CSV = IO [Entry]
 data Variable = Value CSV | Procedure Query Environment
 type Environment = Map.Map String Variable
-type State = (CSV, Environment, Query)  
-
+type State = (CSV, Environment, Query)
 
 main :: IO ()
 main = catch main' noParse
@@ -33,7 +32,7 @@ main' = do (fileName : _) <- getArgs
            
            let parsedProg = parseCalc (alexScanTokens sourceText)
            let f = isTypeSafe parsedProg [] 
-           if (f == False) then error "Type Error" else evalProgLoop parsedProg Map.empty
+           if f then evalProgLoop parsedProg Map.empty else error "Type Error"
            return ()
 
 
@@ -44,10 +43,11 @@ emptyCSV = pure []
 -- Evaluates the program, one Query at a time. Each Query is evaluated one Pipe at a time
 evalProgLoop :: Prog -> Environment -> IO ()
 evalProgLoop [] _ = return () 
-evalProgLoop (e:prog) env = do let (maybeVar, var) = evalStatement e env
-                               var' <- strictlyEval var
-                               let env1 = addEntry maybeVar var' env
+evalProgLoop (e:prog) env = do let (maybeVar, val) = evalStatement e env
+                               val' <- strictlyEval val
+                               let env1 = addEntry maybeVar val' env
                                evalProgLoop prog env1 
+  
   
 -- To escape from Haskell's lazyness, we strictly evaluate some of the expressions
 strictlyEval :: Variable -> IO Variable
@@ -58,6 +58,7 @@ strictlyEval p = return p
 addEntry:: Maybe String -> Variable -> Environment -> Environment
 addEntry Nothing _ env = env
 addEntry (Just name) val env = Map.insert name val env
+
 
 -- Types of Statements:
 -- 
@@ -71,11 +72,13 @@ evalStatement (Init name query) env   = (Just name, Value $ evalQuery (emptyCSV,
 evalStatement (Method name query) env = (Just name, Procedure query env)
 evalStatement (Expression query) env  = (Nothing, Value $ evalQuery (emptyCSV, env, query))     
 
+
 -- Evaluates a Query, one Pipe at a time
 evalQuery:: State -> CSV                
 evalQuery (csv, env, PipeLine pipe query) = let csv1 = evalQuery (csv, env, pipe) in evalQuery (csv1, env, query) 
 evalQuery (csv, env, PipeEnd pipe) = evalQuery1 pipe csv env                           
-                    
+
+
 -- Pipes and their functionality:
 -- 
 -- "asc" = Ascend pipe. Takes a CSV, orders it in ascening order and returns it to the next pipe.
@@ -109,6 +112,7 @@ evalQuery1 (Error message) csv _    = strictPipe   (\_ -> error message) csv
 evalQuery1 (VarName name) csv env   = getBinding name env csv
 evalQuery1 (FullBinary b) _ env     = binaryEval b env
 evalQuery1 (If conds query) csv env = resolveIf conds (csv, env, query) 
+
 
 -- Unwraps syntax sugar such as [$1..$3, $5] into [$1, $2, $3, $5]
 unwrapColItems:: Cols -> (Entry,Int) -> [Col]
@@ -147,10 +151,12 @@ resolveIf conds (csv, env, query) = do xs <- csv
                                                     ) indexed
                                        sequence mapped
 
+
 resolveReform :: Cols -> [Entry] -> [Entry]
 resolveReform cols xs = map (\e -> reform (unwrapColItems cols e) e) zipped
                         where 
                         zipped = zip xs [0..]
+
 
 reform :: [Col] -> (Entry, Int) -> Entry
 reform cols (entry, i) = map (getEntryValue (entry,i)) cols
@@ -175,7 +181,6 @@ tryToImport name = do b <- doesFileExist name
                       if (b) then strictFilter (fmap (fmap trim . splitOn ',').lines) $ readFile name
                       else error $ "Error: File " ++ name ++ " does not exist!"
                   
-         
 
 -- A strict pipe is a pipe which doesn't modify the input CSV, it only performs some side-effects.
 -- It is 'strict' because it strictly evaluates the input csv before outputting it to the next pipe.
@@ -202,8 +207,7 @@ binaryEval (Diff eCSV1 eCSV2) env = liftM2 (\\) (getCSV eCSV1 env) (getCSV eCSV2
 binaryEval (Cross eCSV1 eCSV2) env = do c1 <- getCSV eCSV1 env
                                         c2 <- getCSV eCSV2 env
                                         return [x ++ y | x <- c1, y <- c2]
-                                       
-
+                     
 
 -- Helper functions
 getCSV :: Query -> Environment -> CSV
@@ -271,6 +275,7 @@ getEntryValue (entry, id) (Index expr) | 0 <= i && i < length entry = entry !! i
 isSpace :: Char -> Bool
 isSpace ' ' = True 
 isSpace '\r' = True 
+isSpace '\t'= True
 isSpace _ = False
 
 trim :: String -> String

@@ -1,3 +1,4 @@
 // Problem IV:
-csv A = import "A.csv";
-A | select ($2 != "") | asc | print;
+import "A.csv" | select ($1 != "") 
+               | asc 
+               | print;

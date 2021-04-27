@@ -1,4 +1,3 @@
 // Problem V:
-csv A = import "A.csv";
-A | reform [$1, "0", $1] | asc | print;
+import "A.csv" | reform [$0, "0", $0] | asc | print;
 
