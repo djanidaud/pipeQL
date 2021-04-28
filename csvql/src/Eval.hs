@@ -10,7 +10,6 @@ import Control.Monad
 import Data.Maybe ( isNothing, fromJust )
 import Data.List
 import System.Directory
-
 import qualified Data.Map as Map
 
 type Entry = [String]
@@ -96,7 +95,7 @@ evalQuery (csv, env, PipeEnd pipe) = evalQuery1 pipe csv env
 -- "x" = Cross-product pipe. Takes two queries and outputs their cartessian product.
 -- "++" = Union pipe. Takes two queries and outputs their union.
 -- "--" = Difference pipe. Takes two queries and outputs their difference.
--- "if <> -> query" = If contol. Takes a predicate and applies a query to all enntries that satisfy the predicate.
+-- "if <cond> -> Query" = If contol. Takes a predicate and applies a query to all enntries that satisfy the predicate.
 evalQuery1 :: CsvExpr -> CSV -> Environment -> CSV
 evalQuery1 Asc csv _                = strictFilter sort csv
 evalQuery1 Desc csv _               = strictFilter (sortBy (flip compare)) csv
