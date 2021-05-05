@@ -104,7 +104,7 @@ evalQuery1 (Import name) _  _       = tryToImport name
 evalQuery1 (Select conds) csv _     = strictFilter (select conds) csv
 evalQuery1 (Update col1 col2) csv _ = strictFilter (\xs -> map (\x -> update x col1 col2) $ zip xs [0..]) csv
 evalQuery1 (Reform cols) csv _      = strictFilter (resolveReform cols) csv
-evalQuery1 Print csv _              = strictPipe   (putStrLn.toString) csv
+evalQuery1 Print csv _              = strictPipe printCSV csv
 evalQuery1 (Write name) csv _       = strictPipe   (writeFile name.toString) csv
 evalQuery1 (Note message) csv _     = strictPipe   (\_ -> putStrLn message) csv
 evalQuery1 (Error message) csv _    = strictPipe   (\_ -> error message) csv
@@ -179,7 +179,11 @@ tryToImport:: String -> CSV
 tryToImport name = do b <- doesFileExist name 
                       if (b) then strictFilter (fmap (fmap trim . splitOn ',').lines) $ readFile name
                       else error $ "Error: File " ++ name ++ " does not exist!"
-                  
+
+
+printCSV :: [Entry] -> IO() 
+printCSV [] = putStr ""
+printCSV es = putStrLn $ toString es       
 
 -- A strict pipe is a pipe which doesn't modify the input CSV, it only performs some side-effects.
 -- It is 'strict' because it strictly evaluates the input csv before outputting it to the next pipe.
