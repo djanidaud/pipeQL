@@ -188,16 +188,27 @@ The language server is following the Language Server Protocol. It provides us wi
 
 ## B. VS Code Extension
 
-```
-Figure 1: How the language looks using VS Code’s Dark+ theme
-```
-```
-Figure 2: How the language looks with the PipeQL Theme
-```
-```
-Figure 3: An example of an on-Hover Event
-```
 
-Figure 4: Keyword auto-completion
-
-
+<p align="center">
+  <img src="report/vs_dark_theme.png" height=175/>
+  <br>
+  Figure 1: How the language looks using VS Code’s Dark+ theme 
+</p>
+    <br>
+<p align="center">
+  <img src="report/vs_pipeql_theme.png" height=175/>
+  <br>
+  Figure 2: How the language looks with the PipeQL Theme
+</p>
+    <br>
+<p align="center">
+  <img src="report/hover.png" height=175/>
+  <br>
+  Figure 3: An example of an on-Hover Event
+</p>
+  <br>
+<p align="center">
+  <img src="report/autocomplete.png" height=200/>
+  <br>
+  Figure 4: Keyword auto-completion
+</p>
