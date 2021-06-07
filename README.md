@@ -24,7 +24,7 @@ Now that we have imported ”A.csv”, and stored it in a variable called A, we 
 In PipeQL almost everything acts as a pipe - a Pipe is an operation which takes a CSV as input and outputs another CSV. A Query is simply a bunch of Pipes connected to each other. To connect different pipes, we use the ’|’ symbol between them:
 
 ```
-<Query> ::= <Pipe> ’|’ <Pipe> ’|’ <Pipe> ’|’  ..<Pipe>;
+<Query> ::= <Pipe> ’|’ <Pipe> ’|’ <Pipe> ’|’ .. <Pipe>;
 ```
 We use ’;’ to mark the end of the query. As we already said, import <fileName> is a pipe. It takes a CSV (in this case an empty one), ignores it and returns the contents of the file. Another pipe is print - it takes a CSV, prints it to the console and then returns the same CSV. We can combine the print and import pipes into a single query:
 
